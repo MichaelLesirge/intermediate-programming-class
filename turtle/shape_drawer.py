@@ -51,7 +51,9 @@ class ShapeDrawer:
     def draw_shape_radius(self, sides: int, height: int, fill=False, heading=None, left = False) -> "ShapeDrawer":
         degrees = 360 // sides
         
-        if fill: self.tur.begin_fill()
+        if fill:
+            if fill is not True: self.tur.fillcolor(fill)
+            self.tur.begin_fill()
         
         distance = (2 * height) * math.tan(math.pi/sides)
         if sides == 3: distance =  (2 * height) * (2 / math.sqrt(sides))
