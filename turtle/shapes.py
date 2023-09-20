@@ -11,9 +11,11 @@ def main() -> None:
     s = ShapeDrawer()
     
     radius = 100
+
+    turtle.circle(radius)
             
     for i in range(3, 10):
-        s.draw_shape_radius(i, radius, center=True).reset()
+        s.draw_shape_radius(i, radius, center_x=True).reset()
     
     turtle.mainloop()
     
