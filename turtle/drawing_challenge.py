@@ -4,12 +4,12 @@ from shape_drawer import ShapeDrawer
 
 def draw_checkers(s: ShapeDrawer, size = 100, dimension = 5, move_to_center = False):
     if move_to_center:
-        s.shift(-size * (dimension / 2), -size * (dimension / 2))
+        s.shift((-size * (dimension / 2), -size * (dimension / 2)))
     
     for i in range(dimension):
         for j in range(dimension):
-            s.draw_shape(4, fill=((i+j) % 2 == 0), distance=size).shift(x=size)
-        s.shift(-size*dimension, size)
+            s.draw_shape(4, fill=((i+j) % 2 == 0), distance=size).shift((size, 0))
+        s.shift((-size*dimension, size))
 
 def draw_boxes(s: ShapeDrawer, num_of_boxes = 5):
     for i in range(num_of_boxes):
@@ -25,10 +25,10 @@ def draw_diamond_corner(s: ShapeDrawer, num_of_lines = 10, line_gap_distance = 5
     x, y = pos or s.tur.pos()
     
     for i in range(num_of_lines + 1):
-        s.tp(x_rotation * (x + (num_of_lines - i) * line_gap_distance), y_rotation * y)
-        s.tur.goto(x_rotation * x, y_rotation * (y + i * line_gap_distance))
+        s.tp((x_rotation * (x + (num_of_lines - i) * line_gap_distance), y_rotation * y))
+        s.tur.goto((x_rotation * x, y_rotation * (y + i * line_gap_distance)))
         
-    s.tp(x, y)
+    s.tp((x, y))
         
 def draw_diamond(s: ShapeDrawer, num_of_lines = 10, line_gap_distance = 50, pos = None):
     for x_rotation in [-1, 1]:
@@ -49,17 +49,14 @@ def main():
     
     wait = 0.5
     
-    s.tp(-100, 100).draw_shape(4, distance=50, fill=False)
-    reset(s, delay_seconds=wait)
-     
-    draw_checkers(s, dimension=5, move_to_center = True)
-    reset(s, delay_seconds=wait)
+    # draw_checkers(s, dimension=5, move_to_center = True)
+    # reset(s, delay_seconds=wait)
     
-    draw_boxes(s, num_of_boxes=5)
-    reset(s, delay_seconds=wait)
+    # draw_boxes(s, num_of_boxes=5)
+    # reset(s, delay_seconds=wait)
     
-    draw_snail(s, num_of_circles=100)
-    reset(s, delay_seconds=wait)
+    # draw_snail(s, num_of_circles=100)
+    # reset(s, delay_seconds=wait)
     
     draw_diamond(s, num_of_lines=10, line_gap_distance=20)    
     

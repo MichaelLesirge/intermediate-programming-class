@@ -5,22 +5,20 @@ class ShapeDrawer:
     def __init__(self) -> None:
         self.tur = turtle.Turtle()
 
-    def shift(self, x = 0, y = 0, heading = 0) -> "ShapeDrawer":
+    def shift(self, d_pos, d_heading = 0) -> "ShapeDrawer":
         """Moves al turtle by dx and dy"""
-        current_x, current_y = self.tur.pos()
-        current_heading = self.tur.heading()
-        self.tp(current_x+x, current_y+y, current_heading + heading)
+        self.tp(self.tur.pos() + d_pos, self.tur.heading() + d_heading)
 
         return self
     
-    def tp(self, x=0, y=0, heading=None) -> "ShapeDrawer":
+    def tp(self, pos, heading=None) -> "ShapeDrawer":
         """
         Go to x, y cords with out drawing.
         If reset is True it sets itself to looking to {reset heading} which be default is left
         if wait is True then it sleeps
         """
         self.tur.penup()
-        self.tur.goto(x, y)
+        self.tur.goto(pos)
         self.tur.pendown()
         
         if heading is not None:
@@ -29,7 +27,7 @@ class ShapeDrawer:
         return self
     
     def reset(self):
-        return self.tp(0, 0, 0)
+        return self.tp((0, 0), heading=0)
         
         
     def move(self, sides: int, degrees, distance, heading=None, left=False) -> "ShapeDrawer":
