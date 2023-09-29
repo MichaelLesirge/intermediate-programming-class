@@ -38,9 +38,9 @@ def main():
     
     num_of_walkers = 100
     # num_of_walkers = int(input("number of walker: "))
-    shape_sides = 3
+    shape_sides = 4
     # shape_sides = int(input("number of sides of shape: "))
-    num_of_steps = 500
+    num_of_steps = 50
     # num_of_steps = int(input("number of steps: "))
     
     distance = 10
@@ -55,7 +55,7 @@ def main():
             walker.step()
         turtle.update()
     
-    number_of_bins = 10
+    number_of_bins = num_of_walkers // 10
     distances = [walker.get_distance_from_start() for walker in walkers]
             
     plt.hist(distances, bins=number_of_bins)
