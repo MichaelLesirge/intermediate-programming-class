@@ -58,6 +58,9 @@ def main():
     number_of_bins = num_of_walkers // 10
     distances = [walker.get_distance_from_start() for walker in walkers]
             
+    plt.title("turtle distance from start")
+    plt.xlabel("distance in pixels from start")
+    plt.ylabel("number of turtles")
     plt.hist(distances, bins=number_of_bins)
     # plt.plot(range(len(distances)), sorted(distances))
 
