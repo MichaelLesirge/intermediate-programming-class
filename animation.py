@@ -58,11 +58,18 @@ class Drop(pygame.sprite.Sprite):
                 
         self.rect.center += self.velocity
         
-        collide_floor = self.rect.collidelist(floors)
+        bounce_back = 0
         
-        if collide_floor != -1:
-            self.rect.y -= self.velocity.y 
-            self.velocity.y *= -0.6
+        for floor in floors:
+            if self.rect.colliderect(floor.rect):
+                bounce_back = self.velocity.y
+                
+                if floor.speed.x > 0: print(self.velocity, floor.speed)
+                
+                self.velocity.y -= floor.speed.y
+                self.velocity.y *= -0.6
+            
+        self.rect.centery -= bounce_back
             
         
     
@@ -73,6 +80,8 @@ class Floor(pygame.sprite.Sprite):
         self.rotation = 0
         
         self.location_func = follow_provider
+
+        self.speed = pygame.Vector2(0, 0)
         
         self.image = pygame.Surface(size)
         pygame.rect.Rect(location, pygame.Vector2(location) + size)
@@ -82,7 +91,10 @@ class Floor(pygame.sprite.Sprite):
         self.image.fill(BLACK)
     
     def update(self) -> None:
-        if self.location_func: self.rect.center = self.location_func()
+        if self.location_func:
+            new_center = pygame.Vector2(self.location_func())
+            self.speed = pygame.Vector2(abs(new_center.x - self.rect.centerx), abs(new_center.y - self.rect.centery))
+            self.rect.center = new_center
         # self.rect.clamp_ip((0, 0), (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 def main():

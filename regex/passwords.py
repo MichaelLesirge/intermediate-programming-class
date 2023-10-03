@@ -10,11 +10,11 @@ def find_all_ranked(pattern: re.Pattern[str], strings: list[str]) -> dict[int, s
     return {rank: line for rank, line in enumerate(strings) if re.match(pattern, line)}
 
 with open(path / "password.txt", "r") as file:
-    lines = [line.rstrip("\n") for line in file]
+    lines = [line.rstrip("\n") for line in file.readlines()]
 
 top_n = 10
 
-pattern = r".[A-Z]."
+pattern = r"[A-Z][a-z]+\d+"
 matches = find_all_ranked(pattern, lines)
 
 print(f"{len(matches)} matches for pattern in list of {len(lines)}. That is {len(matches)/len(lines):.1%} of passwords on the list.")
