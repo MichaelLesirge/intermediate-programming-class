@@ -6,7 +6,7 @@ path = pathlib.Path(__file__).parent
 def find_all(pattern: re.Pattern[str], strings: list[str]) -> dict[int, str]:
     return [line for line in strings if re.match(pattern, line)]
 
-def find_all_ranked(pattern: re.Pattern[str], strings: list[str]) -> dict[int, str]:
+def find_all_ranked(pattern: re.Pattern[str], strings: list[str]) -> list[str]:
     return {rank: line for rank, line in enumerate(strings) if re.match(pattern, line)}
 
 with open(path / "password.txt", "r") as file:
