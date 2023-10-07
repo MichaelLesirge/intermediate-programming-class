@@ -1,6 +1,10 @@
 import random
 import turtle
+
 from shape_drawer import ShapeDrawer
+
+import pandas as pd
+from matplotlib import pyplot as plt
 
 class Walker():
     def __init__(self, shape_sides: int, distance: float, start: turtle.Vec2D = (0, 0)) -> None:
@@ -40,7 +44,7 @@ def main():
     turtle.tracer(False)
     
     distance = 7
-    num_of_walkers = 10
+    num_of_walkers = 30
     num_of_steps = 100
     
     turtle.tracer(False)
@@ -55,7 +59,7 @@ def main():
     
     shape_size = 75
     
-    walkers = []
+    walker_groups: dict[int, list[Walker]] = {}
     
     for i in range(num_of_shapes_in_row):
         for j in range(num_of_shapes_in_col):
@@ -66,20 +70,24 @@ def main():
             start_point = (row * i + row / 2, col * j + col / 2)
                         
             s.tp(start_point, heading=0).inscribed_circle(shape_sides, shape_size)
-            walkers.extend([Walker(shape_sides, distance, start_point) for i in range(num_of_walkers)])
+            walker_groups[shape_sides] = [Walker(shape_sides, distance, start_point) for i in range(num_of_walkers)]
         
     turtle.update()
     
     for i in range(num_of_steps):
-        for walker in walkers:
-            walker.step()
+        for walker_group in walker_groups.values():
+            for walker in walker_group:
+                walker.step()
         turtle.update()
-        
-    turtle.mainloop()
-         
-def graph_distance(num_of_walkers = 100, shape_sides = 4, num_of_steps = 50, distance = 10):
-    from matplotlib import pyplot as plt
     
+    num_of_bins = num_of_walkers
+    
+    df = pd.DataFrame({sides: [walker.get_distance_from_start() for walker in walker_group] for sides, walker_group in walker_groups.items()})
+    df2 = df[sorted(list(walker_groups.keys()))]
+    df2.plot.hist(stacked=True, bins=num_of_bins)
+    plt.show()
+                 
+def graph_distance(num_of_walkers = 100, shape_sides = 4, num_of_steps = 50, distance = 10):    
     # num_of_walkers = int(input("number of walker: "))
     # shape_sides = int(input("number of sides of shape: "))
     # num_of_steps = int(input("number of steps: "))
@@ -96,17 +104,11 @@ def graph_distance(num_of_walkers = 100, shape_sides = 4, num_of_steps = 50, dis
     
     number_of_bins = num_of_walkers // 10
     distances = [walker.get_distance_from_start() for walker in walkers]
-            
-    plt.title("turtle distance from start")
-    plt.xlabel("distance in pixels from start")
-    plt.ylabel("number of turtles")
-    plt.hist(distances, bins=number_of_bins)
-    # plt.plot(range(len(distances)), sorted(distances))
 
+    df = pd.DataFrame(distances, columns=["distance"])
+    df.plot.hist(bins=number_of_bins, alpha=0.5)
     plt.show()
-    
-    turtle.mainloop()
-    
+        
 
 if __name__ == "__main__":
     main()

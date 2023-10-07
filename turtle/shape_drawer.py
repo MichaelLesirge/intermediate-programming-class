@@ -65,6 +65,18 @@ class ShapeDrawer:
         if fill: self.tur.end_fill()
                 
         return self
+    
+    def inscribed_circle(self, corners: int, radius: int, center_y: bool = True) -> "ShapeDrawer":
+        
+        start_pos = self.tur.pos()
+        
+        self.shift((0, radius * (1 if center_y else 2)))
+        
+        self.tur.circle(-radius, extent=360, steps=corners)
+        
+        self.tp(start_pos)
+        
+        return self
         
         
     def draw_shape(self, sides: int, distance: int, fill=False, heading=None) -> "ShapeDrawer":
