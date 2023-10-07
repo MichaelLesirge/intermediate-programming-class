@@ -1,14 +1,16 @@
 import random
 import turtle
-
-# do pip install matplotlib
-import matplotlib.pyplot as plt
-import numpy as np        
+from shape_drawer import ShapeDrawer
 
 class Walker():
-    def __init__(self, shape_sides: int, distance) -> None:
+    def __init__(self, shape_sides: int, distance: float, start: turtle.Vec2D = (0, 0)) -> None:
         
         self.tur = turtle.Turtle()
+        
+        self.tur.pu()
+        self.tur.goto(start)
+        self.tur.pd()
+        
         self.tur.color(random.random(), random.random(), random.random())
         
         self.degrees = 360 / shape_sides  
@@ -33,17 +35,54 @@ class Walker():
         
         self.tur.left(random.randint(0, self.sides) * self.degrees)
         self.tur.forward(self.distance)
-         
+     
 def main():
+    turtle.tracer(False)
     
-    num_of_walkers = 100
+    distance = 7
+    num_of_walkers = 10
+    num_of_steps = 100
+    
+    turtle.tracer(False)
+    
+    turtle.setworldcoordinates(0, 0, turtle.window_width(), turtle.window_height())
+    
+    s = ShapeDrawer()
+    
+    num_of_shapes_in_row = 3
+    num_of_shapes_in_col = 3
+    start_at = 2
+    
+    shape_size = 75
+    
+    walkers = []
+    
+    for i in range(num_of_shapes_in_row):
+        for j in range(num_of_shapes_in_col):
+            
+            shape_sides = i + ((num_of_shapes_in_col-j-1) * num_of_shapes_in_col) + start_at
+            row = turtle.window_width() / num_of_shapes_in_row
+            col = turtle.window_height() / num_of_shapes_in_col
+            start_point = (row * i + row / 2, col * j + col / 2)
+                        
+            s.tp(start_point, heading=0).inscribed_circle(shape_sides, shape_size)
+            walkers.extend([Walker(shape_sides, distance, start_point) for i in range(num_of_walkers)])
+        
+    turtle.update()
+    
+    for i in range(num_of_steps):
+        for walker in walkers:
+            walker.step()
+        turtle.update()
+        
+    turtle.mainloop()
+         
+def graph_distance(num_of_walkers = 100, shape_sides = 4, num_of_steps = 50, distance = 10):
+    from matplotlib import pyplot as plt
+    
     # num_of_walkers = int(input("number of walker: "))
-    shape_sides = 4
     # shape_sides = int(input("number of sides of shape: "))
-    num_of_steps = 50
     # num_of_steps = int(input("number of steps: "))
-    
-    distance = 10
     # distance = int(input("number of pixels to walk each step"))
     
     turtle.tracer(False)
