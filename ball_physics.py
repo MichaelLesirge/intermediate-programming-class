@@ -1,4 +1,3 @@
-from typing import Any
 import pygame
 import random
 import math
@@ -8,8 +7,9 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-BOUNCE_RETENTION = 0.6
+BOUNCE_RETENTION = 0.9
 GRAVITY = pygame.Vector2(0, 0.5)
+AIR_RESISTANCE = 0.005
 
 FPS = 60
 WHITE = (255, 255, 255)
@@ -61,9 +61,22 @@ class Ball(pygame.sprite.Sprite):
         other_balls: list[Ball] = list(other_balls_group)
         
         self.velocity += GRAVITY
+        if self.velocity.x > 0: self.velocity.x -= AIR_RESISTANCE
+        if self.velocity.x < 0: self.velocity.x += AIR_RESISTANCE
+        if self.velocity.y > 0: self.velocity.y -= AIR_RESISTANCE
+        if self.velocity.y < 0: self.velocity.y += AIR_RESISTANCE
         
         self.position += self.velocity
+
+        if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
+            self.velocity.x *= -BOUNCE_RETENTION
             
+        for floor in floors:
+            # if self.rect.bottom > floor.rect.top:
+            if self.rect.colliderect(floor.rect):
+                self.rect.bottom = floor.rect.top
+                self.velocity.y -= 3
+                self.velocity.y *= -BOUNCE_RETENTION
         
     
 class Floor(pygame.sprite.Sprite):
