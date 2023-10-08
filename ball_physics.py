@@ -32,7 +32,7 @@ class Ball(pygame.sprite.Sprite):
     @classmethod
     def random_shape(cls):
         x_range = 50
-        x_velocity_range = 10
+        x_velocity_range = 7
         
         center_x = SCREEN_WIDTH // 2
         location = (random.randint(center_x - x_range, center_x + x_range), 0)
@@ -78,27 +78,26 @@ class Ball(pygame.sprite.Sprite):
         self.velocity.move_towards_ip((0, 0), AIR_RESISTANCE)
 
         if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
+            self.rect.x -= self.velocity.x
             self.velocity.x *= -BOUNCE_RETENTION
                  
         for floor in floors:
             if self.rect.colliderect(floor.rect) and pygame.sprite.collide_mask(self, floor):
                 self.rect.y -= self.velocity.y
-                                                
+                                                                         
                 angle_radians = math.radians(90 - floor.angle)
                 nx = math.cos(angle_radians)
                 ny = math.sin(angle_radians)
                 self.velocity.reflect_ip((nx, ny))
-                
+                    
                 self.velocity.y *= BOUNCE_RETENTION
-        
+            
         
         # for other in other_balls:
         #     if other is self: continue
             
-        #     if self.rect.colliderect(other.rect):
-        #         collide_point = pygame.sprite.collide_mask(self, other)
-        #         if collide_point:
-        #             pass
+        #     if pygame.sprite.collide_circle(self, other):
+                
                 
     
 class Floor(pygame.sprite.Sprite):
