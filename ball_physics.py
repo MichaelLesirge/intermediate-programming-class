@@ -1,3 +1,13 @@
+"""
+Done, not touching. If I let myself keep on working on this one I will keep on working on it until I have a full 2d physics engine
+
+Things to finish if I do have a tone of time:
+- Different bounces for different edges of floor blocks
+- Balls bouncing off each other
+- Be able to place blocks and make marble run type things
+- Visual effects: Ball changes color on bounce, ball breaks into particles after staying still to long, ball makes ground bounce up and down
+"""
+
 import pygame
 import random
 import math
@@ -73,9 +83,7 @@ class Ball(pygame.sprite.Sprite):
         for floor in floors:
             if self.rect.colliderect(floor.rect) and pygame.sprite.collide_mask(self, floor):
                 self.rect.y -= self.velocity.y
-                
-                if self.rect.y > floor.rect.y: continue
-                                
+                                                
                 angle_radians = math.radians(90 - floor.angle)
                 nx = math.cos(angle_radians)
                 ny = math.sin(angle_radians)
