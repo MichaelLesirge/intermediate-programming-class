@@ -7,7 +7,7 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-BOUNCE_RETENTION = 0.9
+BOUNCE_RETENTION = 0.6
 GRAVITY = pygame.Vector2(0, 0.5)
 AIR_RESISTANCE = 0.005
 
@@ -60,54 +60,67 @@ class Ball(pygame.sprite.Sprite):
         floors: list[Floor] = list(floors_group)
         other_balls: list[Ball] = list(other_balls_group)
         
-        self.velocity += GRAVITY
-        if self.velocity.x > 0: self.velocity.x -= AIR_RESISTANCE
-        if self.velocity.x < 0: self.velocity.x += AIR_RESISTANCE
-        if self.velocity.y > 0: self.velocity.y -= AIR_RESISTANCE
-        if self.velocity.y < 0: self.velocity.y += AIR_RESISTANCE
-        
+        self.velocity += GRAVITY * self.mass
         self.position += self.velocity
+
+        self.velocity.move_towards_ip((0, 0), AIR_RESISTANCE)
 
         if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
             self.velocity.x *= -BOUNCE_RETENTION
-            
+                 
         for floor in floors:
-            # if self.rect.bottom > floor.rect.top:
-            if self.rect.colliderect(floor.rect):
-                self.rect.bottom = floor.rect.top
-                self.velocity.y -= 3
-                self.velocity.y *= -BOUNCE_RETENTION
+            if self.rect.colliderect(floor.rect) and pygame.sprite.collide_mask(self, floor):
+                self.rect.y -= self.velocity.y
+                
+                if self.rect.y > floor.rect.y: continue
+                                
+                angle_radians = math.radians(90 - floor.angle)
+                nx = math.cos(angle_radians)
+                ny = math.sin(angle_radians)
+                self.velocity.reflect_ip((nx, ny))
+                
+                self.velocity.y *= BOUNCE_RETENTION
         
+        
+        # for other in other_balls:
+        #     if other is self: continue
+            
+        #     if self.rect.colliderect(other.rect):
+        #         collide_point = pygame.sprite.collide_mask(self, other)
+        #         if collide_point:
+        #             pass
+                
     
 class Floor(pygame.sprite.Sprite):
-    def __init__(self, size: pygame.Vector2, location: pygame.Vector2 = (0, 0)) -> None:
+    def __init__(self, size: pygame.Vector2, location: pygame.Vector2 = (0, 0), angle = 0) -> None:
         super().__init__()
         
-        self.angle = 0
+        self.angle = angle % 180
         self.mass = float("inf")
         
         self.speed = pygame.Vector2(0, 0)
         
-        self.image_start = pygame.Surface(size)
+        self.image = pygame.Surface(size)
         self.rect = pygame.rect.Rect(location, pygame.Vector2(location) + size)
         
-        self.image_start.fill(BLACK)
-        self.image = self.image_start
+        self.image.fill(BLACK)
+        
+        self.image = pygame.transform.rotate(self.image, self.angle)
+        self.image.set_colorkey((255, 255, 255))
+        
     
 class Paddle(Floor):
     def __init__(self, size: pygame.Vector2, location: pygame.Vector2 = (0, 0)) -> None:
-        super().__init__(size, location)
+        super().__init__(size, location) 
         
-        change_size = 5
         color = (0, 75, 214)
+        
+        self.image_start = self.image
         
         self.image.fill(color)
         
-        self.spin_speed = change_size
-        self.grow_size = change_size
-                
-        self.image.set_colorkey((30, 30, 30))
-        
+        self.spin_speed = 5
+                 
         self.should_move = False
          
     def update(self) -> None:
@@ -115,14 +128,10 @@ class Paddle(Floor):
         keys = pygame.key.get_pressed()
                 
         if keys[pygame.K_LEFT]:
-            self.angle = (self.angle + self.spin_speed) % 360
+            self.angle = (self.angle + self.spin_speed) % 180
         if keys[pygame.K_RIGHT]:
-            self.angle = (self.angle - self.spin_speed) % 360
-        # if keys[pygame.K_UP]:
-        #     self.width = min(self.width + self.grow_size, 100)
-        # if keys[pygame.K_DOWN]:
-        #     self.width - max(self.grow_size - self.grow_size, 0)
-        
+            self.angle = (self.angle - self.spin_speed) % 180
+            
         self.image = pygame.transform.rotate(self.image_start, self.angle)
         self.rect = self.image.get_rect()
         
@@ -141,8 +150,17 @@ def main():
 
     floors = pygame.sprite.Group()
     
-    floor = Floor((SCREEN_WIDTH, SCREEN_HEIGHT * 0.1), (0, SCREEN_HEIGHT * 0.9))
+    floor_height = SCREEN_HEIGHT * 0.9
+    
+    floor = Floor((SCREEN_WIDTH, SCREEN_HEIGHT * 0.1), (0, floor_height))
     floors.add(floor)
+    
+    block_width = 100
+    
+    # l_block = Floor((block_width, 10), (SCREEN_WIDTH / 2 - block_width / 2, floor_height - 10), 45)
+    # floors.add(l_block)
+    # r_block = Floor((block_width, 10), (SCREEN_WIDTH / 2 + block_width / 2, floor_height - 10), -45)
+    # floors.add(r_block)
     
     paddle = Paddle((100, 10))
     floors.add(paddle)
