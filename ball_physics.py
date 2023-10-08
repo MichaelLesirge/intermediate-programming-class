@@ -31,8 +31,8 @@ pygame.display.set_caption("Falling Shapes")
 class Ball(pygame.sprite.Sprite):
     @classmethod
     def random_shape(cls):
-        x_range = 50
-        x_velocity_range = 7
+        x_range = SCREEN_HEIGHT // 2
+        x_velocity_range = 4
         
         center_x = SCREEN_WIDTH // 2
         location = (random.randint(center_x - x_range, center_x + x_range), 0)
@@ -57,6 +57,10 @@ class Ball(pygame.sprite.Sprite):
         
         self.velocity = pygame.Vector2(velocity) 
         
+        self.start_time_to_live = 200
+        self.start_hide = self.start_time_to_live * 0.5
+        self.time_to_live = self.start_time_to_live
+        
     @property
     def position(self) -> pygame.Vector2:
         return pygame.Vector2(self.rect.center)
@@ -76,6 +80,15 @@ class Ball(pygame.sprite.Sprite):
         self.position += self.velocity
 
         self.velocity.move_towards_ip((0, 0), AIR_RESISTANCE)
+        
+        if self.velocity.length() < 2:
+            self.time_to_live -= 1
+        else:
+            self.time_to_live = min(self.start_time_to_live + 10, self.start_time_to_live)
+        if self.time_to_live < self.start_hide:
+            self.image.set_alpha(255 * (self.time_to_live / self.start_hide))
+        if self.time_to_live == 0:
+            self.kill()
 
         if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
             self.rect.x -= self.velocity.x
@@ -90,16 +103,21 @@ class Ball(pygame.sprite.Sprite):
                 ny = math.sin(angle_radians)
                 self.velocity.reflect_ip((nx, ny))
                     
-                self.velocity.y *= BOUNCE_RETENTION
+                self.velocity.y *= (BOUNCE_RETENTION / 2)
+          
+        for other in other_balls:
+            if other is self: continue
             
-        
-        # for other in other_balls:
-        #     if other is self: continue
-            
-        #     if pygame.sprite.collide_circle(self, other):
-                
-                
-    
+            # if pygame.sprite.collide_circle(self, other):
+            if self.rect.colliderect(other.rect) and pygame.sprite.collide_mask(self, other):
+                    nv = (self.position - other.position)
+                    if nv.length() > 0:
+                        mass_total = self.mass + other.mass
+                        self.velocity = self.velocity.reflect(nv.normalize())
+                        other.velocity = other.velocity.reflect(nv.normalize())
+                        # self.position += nv.normalize() * (1 + other.mass / mass_total)
+                    self.position += nv * 0.04
+                    
 class Floor(pygame.sprite.Sprite):
     def __init__(self, size: pygame.Vector2, location: pygame.Vector2 = (0, 0), angle = 0) -> None:
         super().__init__()
@@ -164,13 +182,6 @@ def main():
     floor = Floor((SCREEN_WIDTH, SCREEN_HEIGHT * 0.1), (0, floor_height))
     floors.add(floor)
     
-    block_width = 100
-    
-    # l_block = Floor((block_width, 10), (SCREEN_WIDTH / 2 - block_width / 2, floor_height - 10), 45)
-    # floors.add(l_block)
-    # r_block = Floor((block_width, 10), (SCREEN_WIDTH / 2 + block_width / 2, floor_height - 10), -45)
-    # floors.add(r_block)
-    
     paddle = Paddle((100, 10))
     floors.add(paddle)
 
@@ -178,7 +189,7 @@ def main():
         if pygame.event.get(pygame.QUIT):
             running = False
    
-        if random.randint(0, 75) == 0:
+        if random.randint(0, 125) == 0:
             new_shape = Ball.random_shape()
             shapes.add(new_shape)
         
