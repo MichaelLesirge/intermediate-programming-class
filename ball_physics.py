@@ -21,10 +21,12 @@ pygame.display.set_caption("Falling Shapes")
 class Ball(pygame.sprite.Sprite):
     @classmethod
     def random_shape(cls):
-        # location = (random.randint(0, SCREEN_WIDTH), 0)
+        x_range = 50
+        x_velocity_range = 10
+        
         center_x = SCREEN_WIDTH // 2
-        location = (random.randint(center_x - 10, center_x + 10), 0)
-        velocity = (random.randint(-5, 5), 0)
+        location = (random.randint(center_x - x_range, center_x + x_range), 0)
+        velocity = (random.randint(-x_velocity_range*100, x_velocity_range*100)/100, 0)
         size = random.randint(20, 50)
         return cls(size, location, velocity) 
     
