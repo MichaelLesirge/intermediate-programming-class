@@ -17,7 +17,9 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-BOUNCE_RETENTION = 0.6
+BOUNCE_RETENTION_GROUND = 0.6
+BOUNCE_RETENTION_BALL = 0.9
+
 GRAVITY = pygame.Vector2(0, 0.5)
 AIR_RESISTANCE = 0.005
 
@@ -92,7 +94,7 @@ class Ball(pygame.sprite.Sprite):
 
         if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
             self.rect.x -= self.velocity.x
-            self.velocity.x *= -BOUNCE_RETENTION
+            self.velocity.x *= -BOUNCE_RETENTION_GROUND
                  
         for floor in floors:
             if self.rect.colliderect(floor.rect) and pygame.sprite.collide_mask(self, floor):
@@ -103,7 +105,7 @@ class Ball(pygame.sprite.Sprite):
                 ny = math.sin(angle_radians)
                 self.velocity.reflect_ip((nx, ny))
                     
-                self.velocity.y *= (BOUNCE_RETENTION / 2)
+                self.velocity.y *= BOUNCE_RETENTION_GROUND
           
         for other in other_balls:
             if other is self: continue
@@ -115,8 +117,9 @@ class Ball(pygame.sprite.Sprite):
                         mass_total = self.mass + other.mass
                         self.velocity = self.velocity.reflect(nv.normalize())
                         other.velocity = other.velocity.reflect(nv.normalize())
-                        # self.position += nv.normalize() * (1 + other.mass / mass_total)
                     self.position += nv * 0.04
+                    self.velocity *= BOUNCE_RETENTION_BALL
+                
                     
 class Floor(pygame.sprite.Sprite):
     def __init__(self, size: pygame.Vector2, location: pygame.Vector2 = (0, 0), angle = 0) -> None:
