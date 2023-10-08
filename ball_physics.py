@@ -7,8 +7,8 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-BOUNCE_RETENTION = 0.9
 GRAVITY = pygame.Vector2(0, 0.5)
+BOUNCE_RETENTION = 0.7
 AIR_RESISTANCE = 0.005
 
 FPS = 60
@@ -56,34 +56,62 @@ class Ball(pygame.sprite.Sprite):
     def set_random_color(self) -> None:
         pygame.draw.circle(self.image, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), (self.radius, self.radius), self.radius)
 
-    def update(self, floors_group: pygame.sprite.Group, other_balls_group: pygame.sprite.Group) -> None:
+    def on_screen(self):
+        return 0 < self.rect.x < SCREEN_WIDTH and 0 < self.rect.y < SCREEN_HEIGHT  
+    
+    def update(self, floors_group: pygame.sprite.Group, other_balls_group: pygame.sprite.Group) -> None:        
         floors: list[Floor] = list(floors_group)
         other_balls: list[Ball] = list(other_balls_group)
         
-        self.velocity += GRAVITY
-        if self.velocity.x > 0: self.velocity.x -= AIR_RESISTANCE
-        if self.velocity.x < 0: self.velocity.x += AIR_RESISTANCE
-        if self.velocity.y > 0: self.velocity.y -= AIR_RESISTANCE
-        if self.velocity.y < 0: self.velocity.y += AIR_RESISTANCE
+        self.velocity.move_towards_ip((0, 0), AIR_RESISTANCE)
         
         self.position += self.velocity
 
         if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
             self.velocity.x *= -BOUNCE_RETENTION
-            
+                
         for floor in floors:
-            # if self.rect.bottom > floor.rect.top:
-            if self.rect.colliderect(floor.rect):
-                self.rect.bottom = floor.rect.top
-                self.velocity.y -= 3
-                self.velocity.y *= -BOUNCE_RETENTION
+            
+            x, y = self.position
+            
+            x_hit = floor.rect.left < self.rect.right and self.rect.left < floor.rect.right
+            
+            if not x_hit: continue
+            
+            amount_above = floor.rect.top - self.rect.bottom
+            
+            is_reverse, a_angle = divmod(floor.angle, 90)
+            
+            b = (floor.rect.right - x) if is_reverse else (x - floor.rect.left)
+            a =  math.tan(a_angle) * b
+            
+            y_bounce = y + a + amount_above  
+                        
+            top_bounce = y_bounce - self.velocity.y < self.rect.y < y_bounce + self.velocity.y
+            bottom_bounce = False
+            
+            if not (bottom_bounce or top_bounce): continue
+                
+            self.rect.bottom = floor.rect.top
+            angle_radians = math.radians(floor.angle if top_bounce else (180 - floor.angle) % 360)
+                
+            nx = math.cos(angle_radians)
+            ny = math.sin(angle_radians)
+            self.velocity.reflect_ip((nx, ny))
+            self.velocity.y *= BOUNCE_RETENTION
+            self.velocity.move_towards_ip((0, 0), AIR_RESISTANCE)
+            
+            break
+        else:
+            self.velocity += GRAVITY
+            
         
     
 class Floor(pygame.sprite.Sprite):
     def __init__(self, size: pygame.Vector2, location: pygame.Vector2 = (0, 0)) -> None:
         super().__init__()
         
-        self.angle = 0
+        self.angle = 90
         self.mass = float("inf")
         
         self.speed = pygame.Vector2(0, 0)
@@ -97,6 +125,7 @@ class Floor(pygame.sprite.Sprite):
 class Paddle(Floor):
     def __init__(self, size: pygame.Vector2, location: pygame.Vector2 = (0, 0)) -> None:
         super().__init__(size, location)
+        self.angle = 0
         
         change_size = 5
         color = (0, 75, 214)
@@ -106,7 +135,7 @@ class Paddle(Floor):
         self.spin_speed = change_size
         self.grow_size = change_size
                 
-        self.image.set_colorkey((30, 30, 30))
+        self.image.set_colorkey((0, 0, 0))
         
         self.should_move = False
          
@@ -115,9 +144,9 @@ class Paddle(Floor):
         keys = pygame.key.get_pressed()
                 
         if keys[pygame.K_LEFT]:
-            self.angle = (self.angle + self.spin_speed) % 360
+            self.angle = (self.angle + self.spin_speed) % 180
         if keys[pygame.K_RIGHT]:
-            self.angle = (self.angle - self.spin_speed) % 360
+            self.angle = (self.angle - self.spin_speed) % 180
         # if keys[pygame.K_UP]:
         #     self.width = min(self.width + self.grow_size, 100)
         # if keys[pygame.K_DOWN]:
