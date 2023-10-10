@@ -19,7 +19,7 @@ def insertion_sort(array: list) -> None:
  
         key = array[i]
  
-        j = i-1
+        j = i - 1
         
         while j >= 0 and key < array[j]:
             array[j + 1] = array[j]
