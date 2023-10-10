@@ -2,17 +2,19 @@
 Time Complexity: O(N^2)
 Auxiliary Space: O(1)
 
-Advantages:
+Bubbles value up by swapping them so the higher is on the left side
+
+Pros:
 - simple
 - no extra memory
 - elements with same key maintain order
 
-Disadvantages:
+Cons:
 - O(N^2) so slow for long lists
 """
 
-def swap(l: list, a: int, b: int):
-    l[a], l[b] = l[b], l[a]
+def swap(array: list, a: int, b: int) -> None:
+    array[a], array[b] = array[b], array[a]
 
 def bubble_sort(array: list):
     n = len(array)

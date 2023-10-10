@@ -3,6 +3,8 @@ import pygame
 from util import make_random
 import algorithms
 
+sorting_algorithms = {algorithms.bubble_sort: 2, algorithms.insertion_sort: 1, algorithms.selection_sort: 1}
+
 """
 Bubble, Insertion, Selection, Merge, and Quick Sort
 Option of shuffled mode and random number mode
@@ -86,9 +88,7 @@ def main() -> None:
     clock = pygame.time.Clock()
         
     font = pygame.font.Font('sorting/font.ttf', 16)
-    
-    sorting_algorithms = {algorithms.bubble_sort: 1, algorithms.insertion_sort: 1}
-    
+     
     for sorter, fps_adjuster in sorting_algorithms.items():  
         def update_screen(display_array):
             if pygame.event.get(pygame.QUIT):
@@ -99,7 +99,8 @@ def main() -> None:
             
             fps = int(Config.FPS * fps_adjuster)
             
-            text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes. {fps} FPS ({fps_adjuster}x speed)", True, "white")
+            speed_multiplayer = f" ({fps_adjuster}x speed)"
+            text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes. {fps} FPS{'' if fps_adjuster == 1 else speed_multiplayer}", True, "white")
             text_rect = text.get_rect()
             
             screen.blit(text, text_rect)
