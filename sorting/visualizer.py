@@ -1,16 +1,13 @@
-import threading
-import winsound
-
 import pygame
 
 import algorithms
 from util import make_random
 
-sorting_algorithms = {algorithms.bubble_sort: 2, algorithms.insertion_sort: 1, algorithms.selection_sort: 1, algorithms.merge_sort: 1}
-
 pygame.init()
 
 class Config:
+    SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort]
+    
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 600
     
@@ -24,8 +21,10 @@ class Config:
     BACKGROUND_COLOR = (0, 0, 0)
     DEFAULT_BLOCK_COLOR = (255, 255, 255)
     
-    FREQUENCY_MIN, FREQUENCY_MAX = 100, 10000
-    MAX_DURATION = 1
+    READ_BLOCK_COLOR = "grey"
+    WRITE_BLOCK_COLOR = "green"
+    
+    TEXT_COLOR = ()
     
     FPS_CHANGE = 0.5
 
@@ -38,10 +37,10 @@ class SortDisplayArray(list):
                 
         self.update_func = update_func
         
-        # self.height_unit = Config.SCREEN_HEIGHT // max(array)
-        self.height_unit = (Config.HEIGHT_MAX - Config.HEIGHT_MIN) // max(array)
+        # self.height_unit = Config.SCREEN_HEIGHT / max(array)
+        self.height_unit = (Config.HEIGHT_MAX - Config.HEIGHT_MIN) / max(array)
         
-        self.width_unit = Config.SCREEN_WIDTH // len(array)
+        self.width_unit = Config.SCREEN_WIDTH / len(array)
          
         # TODO keep track of updates and only draw changes
         # self.updates = []
@@ -51,8 +50,9 @@ class SortDisplayArray(list):
         self.rect_key: dict[int, pygame.Rect] = {value: self.make_value_rect(value, index) for index, value in enumerate(self)}
     
     def make_value_rect(self, index: int, value: int) -> pygame.Rect:
-        height = (self.height_unit * value) + Config.HEIGHT_MIN
-        return pygame.Rect(Config.SCREEN_WIDTH - (self.width_unit * (index + 1)), height, self.width_unit, Config.SCREEN_HEIGHT)
+        # height = Config.SCREEN_HEIGHT - value * self.height_unit
+        height = Config.HEIGHT_MAX - value * self.height_unit
+        return pygame.Rect((self.width_unit * index), height, self.width_unit, Config.SCREEN_HEIGHT)
     
     def draw_all(self, screen: pygame.Surface) -> None:
         highlighted_indexes = {value: key for key, value in self.marks.items()}
@@ -62,7 +62,7 @@ class SortDisplayArray(list):
     def __getitem__(self, index):
         self.reads += 1
         
-        self.marks["grey"] = index
+        self.marks[Config.READ_BLOCK_COLOR] = index
         self.update_func(self)
         
         return super().__getitem__(index)
@@ -72,8 +72,8 @@ class SortDisplayArray(list):
          
         # if Config.MAX_DURATION != 0: threading.Thread(target=self.beep, args=(value,), kwargs={}).start()
          
-        self.marks["green"] = index
-        self.update_func(self, value)
+        self.marks[Config.WRITE_BLOCK_COLOR] = index
+        self.update_func(self)
         
         return super().__setitem__(index, value)
     
@@ -90,10 +90,10 @@ def main() -> None:
     font = pygame.font.Font('sorting/font.ttf', 16)
     
      
-    for sorter, fps_adjuster in sorting_algorithms.items(): 
-        frequency_block = (Config.FREQUENCY_MAX - Config.FREQUENCY_MIN) / Config.ARRAY_LENGTH
-         
-        def update_screen(display_array, value = None):
+    for sorter in Config.SORTING_ALGORITHMS:
+        fps_adjuster = 1
+                 
+        def update_screen(display_array):
             nonlocal fps_adjuster
             
             for event in pygame.event.get():
@@ -101,20 +101,18 @@ def main() -> None:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_DOWN: fps_adjuster = round(max(fps_adjuster - Config.FPS_CHANGE, 0), 2)
                     if event.key == pygame.K_UP: fps_adjuster = round(min(fps_adjuster + Config.FPS_CHANGE, 20), 2)
+                    if event.key == pygame.K_RIGHT: fps_adjuster = float("inf")
+                    
+            if fps_adjuster == float("inf"): return
 
             screen.fill(Config.BACKGROUND_COLOR)        
             display_array.draw_all(screen)
             
             fps = int(Config.BASE_FPS * fps_adjuster) if fps_adjuster else 1
             
-            speed_multiplayer = f" ({fps_adjuster}x speed)"
-            text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes. {fps} FPS{'' if fps_adjuster == 1 else speed_multiplayer}", True, (200, 200, 250))
+            fps_data =  f" {fps} FPS" + ('' if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)")
+            text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes - {fps_data}", True, (200, 200, 250))
             text_rect = text.get_rect()
-            
-            if value:
-                frequency = int(Config.FREQUENCY_MAX - (frequency_block * value))
-                duration = int(min(1 / fps, Config.MAX_DURATION) * 1000)
-                threading.Thread(target=lambda: winsound.Beep(frequency, duration)).start()
             
             screen.blit(text, text_rect)
             
