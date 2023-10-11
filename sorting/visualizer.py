@@ -1,3 +1,6 @@
+import threading
+import winsound
+
 import pygame
 
 import algorithms
@@ -20,6 +23,9 @@ class Config:
     
     BACKGROUND_COLOR = (0, 0, 0)
     DEFAULT_BLOCK_COLOR = (255, 255, 255)
+    
+    FREQUENCY_MIN, FREQUENCY_MAX = 100, 10000
+    MAX_DURATION = 1
     
     READ_BLOCK_COLOR = "grey"
     WRITE_BLOCK_COLOR = "green"
@@ -73,7 +79,7 @@ class SortDisplayArray(list):
         # if Config.MAX_DURATION != 0: threading.Thread(target=self.beep, args=(value,), kwargs={}).start()
          
         self.marks[Config.WRITE_BLOCK_COLOR] = index
-        self.update_func(self)
+        self.update_func(self, value)
         
         return super().__setitem__(index, value)
     
@@ -92,8 +98,8 @@ def main() -> None:
      
     for sorter in Config.SORTING_ALGORITHMS:
         fps_adjuster = 1
-                 
-        def update_screen(display_array):
+        
+        def update_screen(display_array, value = None):
             nonlocal fps_adjuster
             
             for event in pygame.event.get():
@@ -113,6 +119,12 @@ def main() -> None:
             fps_data =  f" {fps} FPS" + ('' if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)")
             text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes - {fps_data}", True, (200, 200, 250))
             text_rect = text.get_rect()
+            
+            if value:
+                frequency_block = (Config.FREQUENCY_MAX - Config.FREQUENCY_MIN) / Config.ARRAY_LENGTH
+                frequency = int(Config.FREQUENCY_MAX - (frequency_block * value))
+                duration = int(min(1 / fps, Config.MAX_DURATION) * 1000 - 200)
+                threading.Thread(target=lambda: winsound.Beep(frequency, duration)).start()
             
             screen.blit(text, text_rect)
             
