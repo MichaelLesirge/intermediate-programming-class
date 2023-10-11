@@ -3,18 +3,27 @@ Time Complexity: average O(N log(N)), worst O(N^2)
 Auxiliary Space: O(1)
 
 divide and conquer that picks pivot then partisans array around it
+
+Pros:
+- almost always O(N log(N)) performance 
+- good on long lists
+
+Cons:
+- worst case O(N^2) if there is a bad pivot
+- not the best for small lists
+
 """
 
 def swap(array: list, a: int, b: int) -> None:
     array[a], array[b] = array[b], array[a]
 
 def partition(array: list, left: int, right: int) -> int:
-    # pivot = array[right]
+    pivot = array[right]
  
     i = left - 1
  
     for j in range(left, right):
-        if array[j] <= array[right]:
+        if array[j] <= pivot:
  
             i += 1
             
