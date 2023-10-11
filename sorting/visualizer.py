@@ -6,7 +6,7 @@ from util import make_random
 pygame.init()
 
 class Config:
-    SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort]
+    SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
     
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 600
@@ -126,6 +126,8 @@ def main() -> None:
         sorter(display_array)
                         
         update_screen(display_array)
+        
+        if fps_adjuster != float("inf"): pygame.time.delay(1000) 
         
     pygame.quit()
 

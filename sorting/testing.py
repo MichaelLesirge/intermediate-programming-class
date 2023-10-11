@@ -1,9 +1,9 @@
 import unittest
 
-from algorithms import bubble_sort, insertion_sort, selection_sort, merge_sort
+import algorithms
 from util import make_random
 
-algorithms = [bubble_sort, insertion_sort, selection_sort, merge_sort]
+algorithms = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
 
 class TestLinkedList(unittest.TestCase):
     def assert_all_sorted(self, array: list):
