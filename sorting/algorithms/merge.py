@@ -15,18 +15,17 @@ Cons:
 """
 
 def merge(array: list, left: int, mid: int, right: int) -> None:
-    start2 = mid + 1
+    left2 = mid + 1
  
-    if array[mid] <= array[start2]:
-        return
+    if array[mid] <= array[left2]: return
  
-    while left <= mid and start2 <= right:
+    while left <= mid and left2 <= right:
  
-        if array[left] <= array[start2]:
+        if array[left] <= array[left2]:
             left += 1
         else:
-            value = array[start2]
-            index = start2
+            value = array[left2]
+            index = left2
  
             while index != left:
                 array[index] = array[index - 1]
@@ -36,7 +35,7 @@ def merge(array: list, left: int, mid: int, right: int) -> None:
 
             left += 1
             mid += 1
-            start2 += 1 
+            left2 += 1 
 
 def merge_sort(array: list, left: int = None, right: int = None) -> None:
     if left is None: left = 0
