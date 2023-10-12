@@ -9,12 +9,12 @@ def swap(array: list, a: int, b: int) -> None:
     array[a], array[b] = array[b], array[a]
 
 def partition(array: list, left: int, right: int) -> int:
-    # pivot = array[right]
+    pivot = array[right]
  
     i = left - 1
  
     for j in range(left, right):
-        if array[j] <= array[right]:
+        if array[j] <= pivot:
  
             i += 1
             
