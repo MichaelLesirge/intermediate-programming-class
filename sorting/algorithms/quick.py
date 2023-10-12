@@ -11,18 +11,19 @@ def swap(array: list, a: int, b: int) -> None:
 def partition(array: list, left: int, right: int) -> int:
     pivot = array[right]
  
-    i = left - 1
+    slow = left - 1
  
-    for j in range(left, right):
-        if array[j] <= pivot:
+    for i in range(left, right):
+        if array[i] <= pivot:
  
-            i += 1
+            slow += 1
             
-            swap(array, i, j)
- 
-    swap(array, i + 1, right)
- 
-    return i + 1
+            swap(array, slow, i)
+            
+    slow += 1
+    
+    swap(array, slow, right)
+    return slow
  
  
 def quick_sort(array: list, left: int = None, right: int = None):
@@ -31,7 +32,7 @@ def quick_sort(array: list, left: int = None, right: int = None):
     
     if left >= right: return
  
-    partition_index = partition(array, left, right)
+    pivot = partition(array, left, right)
  
-    quick_sort(array, left, partition_index - 1)
-    quick_sort(array, partition_index + 1, right)
+    quick_sort(array, left, pivot - 1)
+    quick_sort(array, pivot + 1, right)
