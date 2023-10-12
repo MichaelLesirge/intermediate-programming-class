@@ -24,3 +24,5 @@ def selection_sort(array: list) -> None:
         min_index = min(range(i, n), key = array.__getitem__)     
         
         swap(array, min_index, i)
+
+def selection_sort_one_line(array): [swap(array, min(range(i, len(array)), key = array.__getitem__), i) for i in range(len(array))]
