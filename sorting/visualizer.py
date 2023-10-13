@@ -8,20 +8,23 @@ pygame.init()
 class Config:
     SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
     
-    SCREEN_WIDTH = 800
+    SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
     
     HEIGHT_MIN, HEIGHT_MAX = 1, SCREEN_HEIGHT - 1
 
     BASE_FPS = 60
     
-    ARRAY_LENGTH = 100
+    ARRAY_LENGTHS = {10: 1, 25: 1, 100: 5, 250: 10, 500: 10, 1000: 10}
     NUM_RANGE = None
+    
+    WAIT_AT_END = 0.5
     
     BACKGROUND_COLOR = (0, 0, 0)
     DEFAULT_BLOCK_COLOR = (255, 255, 255)
     
     READ_BLOCK_COLOR = "grey"
+    PAST_WRITE_BLOCK_COLOR = "aquamarine2"
     WRITE_BLOCK_COLOR = "green"
     
     TEXT_COLOR = ()
@@ -72,6 +75,7 @@ class SortDisplayArray(list):
          
         # if Config.MAX_DURATION != 0: threading.Thread(target=self.beep, args=(value,), kwargs={}).start()
          
+        # self.marks[Config.PAST_WRITE_BLOCK_COLOR] = self.marks.get(Config.WRITE_BLOCK_COLOR, -1)
         self.marks[Config.WRITE_BLOCK_COLOR] = index
         self.update_func(self)
         
@@ -89,45 +93,54 @@ def main() -> None:
         
     font = pygame.font.Font('sorting/font.ttf', 16)
     
-     
-    for sorter in Config.SORTING_ALGORITHMS:
-        fps_adjuster = 1
-                 
-        def update_screen(display_array):
-            nonlocal fps_adjuster
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT: exit(pygame.quit())
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_DOWN: fps_adjuster = round(max(fps_adjuster - Config.FPS_CHANGE, 0), 2)
-                    if event.key == pygame.K_UP: fps_adjuster = round(min(fps_adjuster + Config.FPS_CHANGE, 20), 2)
-                    if event.key == pygame.K_RIGHT: fps_adjuster = float("inf")
-                    
-            if fps_adjuster == float("inf"): return
-
-            screen.fill(Config.BACKGROUND_COLOR)        
-            display_array.draw_all(screen)
-            
-            fps = int(Config.BASE_FPS * fps_adjuster) if fps_adjuster else 1
-            
-            fps_data =  f" {fps} FPS" + ('' if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)")
-            text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes - {fps_data}", True, (200, 200, 250))
-            text_rect = text.get_rect()
-            
-            screen.blit(text, text_rect)
-            
-            pygame.display.flip()
-            
-            clock.tick(fps)
-         
-        array = make_random(Config.ARRAY_LENGTH, Config.NUM_RANGE) 
-        display_array = SortDisplayArray(array, update_screen)
-                
-        sorter(display_array)
-                        
-        update_screen(display_array)
+    
+    for length, fps_adjuster_default in Config.ARRAY_LENGTHS.items():
         
-        if fps_adjuster != float("inf"): pygame.time.delay(1000) 
+        fps_adjuster_default_text = f" Default speed is {round(fps_adjuster_default, 2)}x."
+        print(f"Sorting demo for {length} element array.{'' if fps_adjuster_default == 1 else fps_adjuster_default_text}")
+                
+        for sorter in Config.SORTING_ALGORITHMS:
+            fps_adjuster = fps_adjuster_default
+                                
+            def update_screen(display_array):
+                nonlocal fps_adjuster
+                                                
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT: exit(pygame.quit())
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_DOWN: fps_adjuster = round(max(fps_adjuster - Config.FPS_CHANGE, 0), 2)
+                        if event.key == pygame.K_UP: fps_adjuster = round(min(fps_adjuster + Config.FPS_CHANGE, 20), 2)
+                        if event.key == pygame.K_RIGHT: fps_adjuster = float("inf")
+                        
+                if fps_adjuster == float("inf"): return
+
+                screen.fill(Config.BACKGROUND_COLOR)        
+                display_array.draw_all(screen)
+                
+                fps = int(Config.BASE_FPS * fps_adjuster) if fps_adjuster else 1
+                                
+                fps_data =  f"{fps} FPS" + ("" if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)") + ("" if clock.get_fps() - fps > -200 else f". Real FPS {int(round(clock.get_fps(), -2))}") + "."
+                text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes. {fps_data}", True, (200, 200, 250))
+                text_rect = text.get_rect()
+                
+                screen.blit(text, text_rect)
+                
+                pygame.display.flip()
+                
+                clock.tick(fps)
+                            
+            array = make_random(length, Config.NUM_RANGE) 
+            display_array = SortDisplayArray(array, update_screen)
+                    
+            sorter(display_array)
+                            
+            update_screen(display_array)
+            
+            print(f"{sorter.__name__}:\t{display_array.reads} reads,\t{display_array.writes} writes.")
+            
+            if fps_adjuster != float("inf"): pygame.time.delay(int(Config.WAIT_AT_END * 1000)) 
+        
+        print()
         
     pygame.quit()
 
