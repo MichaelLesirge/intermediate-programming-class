@@ -31,9 +31,8 @@ class Config:
     
     FPS_CHANGE = 0.5
 
-# TODO id all values in array (inherit from int) and then always have smooth mode and go back to storing rects in dict  
 class SortDisplayArray(list):
-    def __init__(self, array: list, update_func = lambda s: None):
+    def __init__(self, array: list[int], update_func = lambda s: None):
         super().__init__(array)        
         self.reads = 0
         self.writes = 0
@@ -49,18 +48,21 @@ class SortDisplayArray(list):
         # self.updates = []
         
         self.marks: dict[int, pygame.Color] = {}    
-            
-        self.rect_key: dict[int, pygame.Rect] = {value: self.make_value_rect(value, index) for index, value in enumerate(self)}
+                
+        self.rect = pygame.Rect(0, 0, (self.width_unit), Config.HEIGHT_MAX)
     
-    def make_value_rect(self, index: int, value: int) -> pygame.Rect:
-        # height = Config.SCREEN_HEIGHT - value * self.height_unit
-        height = Config.HEIGHT_MAX - value * self.height_unit
-        return pygame.Rect((self.width_unit * index), height, self.width_unit, Config.SCREEN_HEIGHT)
+    def get_rect(self, index, value):
+        # cant use setdefault since it would always still makes the new rect
+        
+        # if value not in self.rect_key: self.rect_key[value] = self.make_rect_value(index, value)
+        self.rect.x = (self.width_unit * index)
+        self.rect.y = Config.SCREEN_HEIGHT - (Config.HEIGHT_MIN + self.height_unit * value)
+        return self.rect
     
     def draw_all(self, screen: pygame.Surface) -> None:
         highlighted_indexes = {value: key for key, value in self.marks.items()}
         for index, value in enumerate(self):
-            pygame.draw.rect(screen, highlighted_indexes.get(index, Config.DEFAULT_BLOCK_COLOR), self.make_value_rect(index, value))
+            pygame.draw.rect(screen, highlighted_indexes.get(index, Config.DEFAULT_BLOCK_COLOR), self.get_rect(index, value))
         
     def __getitem__(self, index):
         self.reads += 1
@@ -70,7 +72,7 @@ class SortDisplayArray(list):
         
         return super().__getitem__(index)
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index, value): 
         self.writes += 1
          
         # if Config.MAX_DURATION != 0: threading.Thread(target=self.beep, args=(value,), kwargs={}).start()
@@ -102,9 +104,9 @@ def main() -> None:
         for sorter in Config.SORTING_ALGORITHMS:
             fps_adjuster = fps_adjuster_default
                                 
-            def update_screen(display_array):
+            def update_screen(display_array: SortDisplayArray):
                 nonlocal fps_adjuster
-                                                
+                                                                
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT: exit(pygame.quit())
                     if event.type == pygame.KEYDOWN:
@@ -119,7 +121,7 @@ def main() -> None:
                 
                 fps = int(Config.BASE_FPS * fps_adjuster) if fps_adjuster else 1
                                 
-                fps_data =  f"{fps} FPS" + ("" if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)") + ("" if clock.get_fps() - fps > -200 else f". Real FPS {int(round(clock.get_fps(), -2))}") + "."
+                fps_data =  f"{fps} FPS" + ("" if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)") + ("" if fps - clock.get_fps() > 100 else f". Real FPS {int(round(clock.get_fps(), -2))}") + "."
                 text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes. {fps_data}", True, (200, 200, 250))
                 text_rect = text.get_rect()
                 
