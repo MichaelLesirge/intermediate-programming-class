@@ -16,6 +16,8 @@ class Config:
     BASE_FPS = 60
     
     ARRAY_LENGTHS = {10: 1, 25: 1, 100: 5, 250: 10, 500: 10, 1000: 10}
+    
+    # NUM_RANGE = (0, 10000)
     NUM_RANGE = None
     
     WAIT_AT_END = 0.5
