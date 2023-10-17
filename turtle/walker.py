@@ -17,7 +17,8 @@ class Walker():
         
         self.tur.color(random.random(), random.random(), random.random())
         
-        self.degrees = 360 / shape_sides  
+        self.shape_sides = shape_sides
+        self.degrees = 360 / self.shape_sides  
         self.distance = distance
         
         self.start_pos = self.tur.pos()
@@ -25,8 +26,8 @@ class Walker():
         self.sides = shape_sides
                             
     def step(self):
-        if random.randint(0, 1): self.tur.left(self.degrees)
-        else: self.tur.forward(self.distance)
+        self.tur.left(self.degrees * random.randrange(self.shape_sides))
+        self.tur.forward(self.distance)
     
     def get_distance_from_start(self) -> float:
         current_pos = self.tur.pos()
