@@ -97,7 +97,6 @@ def main() -> None:
         
     font = pygame.font.Font('sorting/font.ttf', 16)
     
-    
     for length, fps_adjuster_default in Config.ARRAY_LENGTHS.items():
         
         fps_adjuster_default_text = f" Default speed is {round(fps_adjuster_default, 2)}x."
@@ -123,7 +122,7 @@ def main() -> None:
                 
                 fps = int(Config.BASE_FPS * fps_adjuster) if fps_adjuster else 1
                                 
-                fps_data =  f"{fps} FPS" + ("" if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)") + ("" if fps - clock.get_fps() > 100 else f". Real FPS {int(round(clock.get_fps(), -2))}") + "."
+                fps_data =  f"{fps} FPS" + ("" if fps_adjuster in (0, 1) else f" ({fps_adjuster}x speed)") + ("" if fps - clock.get_fps() < 100 else f". Real FPS {int(round(clock.get_fps(), -2))}") + "."
                 text = font.render(f"{sorter.__name__} - {display_array.reads} reads, {display_array.writes} writes. {fps_data}", True, (200, 200, 250))
                 text_rect = text.get_rect()
                 
