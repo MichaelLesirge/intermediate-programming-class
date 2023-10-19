@@ -1,6 +1,6 @@
 """
 Time Complexity: O(N log(N))
-Auxiliary Space: O(N)
+Auxiliary Space: O(1)
 
 split into sub arrays and merge back the arrays in order
 
@@ -13,6 +13,43 @@ Cons:
 - not the best for small lists
 - use extra arrays
 """
+
+def merge_sort(array: list) -> None:
+    if len(array) < 2: return
+ 
+    mid = len(array) // 2
+
+    left_array = array[:mid]
+
+    right_array = array[mid:]
+
+    merge_sort(left_array)
+
+    merge_sort(right_array)
+
+    left_count = right_count = total_count = 0
+
+    while left_count < len(left_array) and right_count < len(right_array):
+        if left_array[left_count] <= right_array[right_count]:
+            array[total_count] = left_array[left_count]
+            left_count += 1
+        else:
+            array[total_count] = right_array[right_count]
+            right_count += 1
+        total_count += 1
+
+    while left_count < len(left_array):
+        array[total_count] = left_array[left_count]
+        left_count += 1
+        total_count += 1
+
+    while right_count < len(right_array):
+        array[total_count] = right_array[right_count]
+        right_count += 1
+        total_count += 1
+        
+
+"""Merge no copy is much slower, but it does not use any more memory, and more importantly it looks much nicer in the animation"""    
 
 def merge_no_copy(array: list, left: int, mid: int, right: int) -> None:
     left2 = mid + 1
@@ -51,36 +88,3 @@ def merge_sort_no_copy(array: list, left: int = None, right: int = None) -> None
 
     merge_no_copy(array, left, mid, right) 
  
-def merge_sort(array: list) -> None:
-    if len(array) < 2: return
- 
-    mid = len(array) // 2
-
-    left_array = array[:mid]
-
-    right_array = array[mid:]
-
-    merge_sort(left_array)
-
-    merge_sort(right_array)
-
-    left_count = right_count = total_count = 0
-
-    while left_count < len(left_array) and right_count < len(right_array):
-        if left_array[left_count] <= right_array[right_count]:
-            array[total_count] = left_array[left_count]
-            left_count += 1
-        else:
-            array[total_count] = right_array[right_count]
-            right_count += 1
-        total_count += 1
-
-    while left_count < len(left_array):
-        array[total_count] = left_array[left_count]
-        left_count += 1
-        total_count += 1
-
-    while right_count < len(right_array):
-        array[total_count] = right_array[right_count]
-        right_count += 1
-        total_count += 1
