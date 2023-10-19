@@ -3,7 +3,7 @@ import unittest
 import algorithms
 from util import make_random
 
-algorithms = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
+algorithms = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.merge_sort_no_copy, algorithms.quick_sort]
 
 class TestLinkedList(unittest.TestCase):
     def assert_all_sorted(self, array: list):
