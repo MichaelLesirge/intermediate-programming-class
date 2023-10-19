@@ -6,7 +6,7 @@ from util import make_random
 pygame.init()
 
 class Config:
-    SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
+    SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort_no_copy, algorithms.quick_sort]
     
     SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
@@ -15,7 +15,7 @@ class Config:
 
     BASE_FPS = 60
     
-    ARRAY_LENGTHS = {10: 1, 25: 1, 100: 5, 250: 10, 500: 10, 1000: 10}
+    ARRAY_LENGTHS = {10: 1, 25: 2, 100: 5, 250: 10, 500: 10, 1000: 10}
     
     # NUM_RANGE = (0, 10000)
     NUM_RANGE = None
