@@ -1,6 +1,6 @@
 """
 Time Complexity: O(N log(N))
-Auxiliary Space: O(1)
+Auxiliary Space: O(N)
 
 split into sub arrays and merge back the arrays in order
 
@@ -14,21 +14,9 @@ Cons:
 - use extra arrays
 """
 
-def merge_sort(array: list) -> None:
-    if len(array) < 2: return
- 
-    mid = len(array) // 2
-
-    left_array = array[:mid]
-
-    right_array = array[mid:]
-
-    merge_sort(left_array)
-
-    merge_sort(right_array)
-
+def merge(array: list, left_array: list, right_array: list) -> None:
     left_count = right_count = total_count = 0
-
+    
     while left_count < len(left_array) and right_count < len(right_array):
         if left_array[left_count] <= right_array[right_count]:
             array[total_count] = left_array[left_count]
@@ -48,6 +36,21 @@ def merge_sort(array: list) -> None:
         right_count += 1
         total_count += 1
         
+
+def merge_sort(array: list) -> None:
+    if len(array) < 2: return
+ 
+    mid = len(array) // 2
+
+    left_array = array[:mid]
+
+    right_array = array[mid:]
+
+    merge_sort(left_array)
+
+    merge_sort(right_array)
+
+    merge(array, left_array, right_array)
 
 """Merge no copy is much slower, but it does not use any more memory, and more importantly it looks much nicer in the animation"""    
 
