@@ -6,7 +6,7 @@ from util import make_random
 pygame.init()
 
 class Config:
-    SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort_no_copy, algorithms.quick_sort]
+    SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
     
     SCREEN_WIDTH = 1000
     SCREEN_HEIGHT = 600
@@ -75,15 +75,19 @@ class SortDisplayArray(list):
         return super().__getitem__(index)
 
     def __setitem__(self, index, value): 
-        self.writes += 1
-         
-        # if Config.MAX_DURATION != 0: threading.Thread(target=self.beep, args=(value,), kwargs={}).start()
-         
-        # self.marks[Config.PAST_WRITE_BLOCK_COLOR] = self.marks.get(Config.WRITE_BLOCK_COLOR, -1)
-        self.marks[Config.WRITE_BLOCK_COLOR] = index
-        self.update_func(self)
+        if isinstance(index, slice):
+            for i, slice_i in enumerate(range(index.start or 0, index.stop or len(self), index.step or 1)):
+                self[slice_i] = value[i]
+        else:
+            self.writes += 1
+            
+            # if Config.MAX_DURATION != 0: threading.Thread(target=self.beep, args=(value,), kwargs={}).start()
+            
+            # self.marks[Config.PAST_WRITE_BLOCK_COLOR] = self.marks.get(Config.WRITE_BLOCK_COLOR, -1)
+            self.marks[Config.WRITE_BLOCK_COLOR] = index
+            self.update_func(self)
         
-        return super().__setitem__(index, value)
+            return super().__setitem__(index, value)
     
     def __str__(self) -> str:
         return f"<{super().__str__()}, reads={self.reads}, writes={self.writes}>"
