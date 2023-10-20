@@ -1,3 +1,4 @@
+import time
 
 import turtle
 from shape_drawer import ShapeDrawer 
@@ -36,7 +37,7 @@ def draw_diamond(s: ShapeDrawer, num_of_lines = 10, line_gap_distance = 50, pos 
             draw_diamond_corner(s, num_of_lines, line_gap_distance, pos, x_rotation, y_rotation)
 
 def reset(s: ShapeDrawer, delay_seconds=0):
-    turtle.delay(delay_seconds * 1000)
+    time.sleep(delay_seconds)
     s.reset()
     s.tur.clear()
 
