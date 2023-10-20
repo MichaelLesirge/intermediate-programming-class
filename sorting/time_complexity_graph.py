@@ -10,12 +10,12 @@ class Config:
     SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
     NUM_RANGE = (-100000, 100000)
     
-    NUM_OF_TIMES_RUN = 13
-
+    # LENGTHS = [(2 ** i) for i in range(15)]
+    LENGTHS = list(range(0, 10)) + list(range(10, 1000, 10))
+    
 def main() -> None:
 
-    lengths = [(2 ** i) for i in range(Config.NUM_OF_TIMES_RUN)]
-    arrays = [make_random(length, Config.NUM_RANGE) for length in lengths]
+    arrays = [make_random(length, Config.NUM_RANGE) for length in Config.LENGTHS]
     
     times = {algorithm: [] for algorithm in Config.SORTING_ALGORITHMS}
     
@@ -39,7 +39,7 @@ def main() -> None:
         print()
             
     for key, times in times.items():
-        plt.plot(lengths, times, label=key.__name__)
+        plt.plot(Config.LENGTHS, times, label=key.__name__)
     
     plt.title("Times for different sorts") 
     plt.xlabel("Array Length")
