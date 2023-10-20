@@ -10,8 +10,9 @@ class Config:
     SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
     NUM_RANGE = (-100000, 100000)
     
-    # LENGTHS = [(2 ** i) for i in range(15)]
-    LENGTHS = list(range(0, 10)) + list(range(10, 1000, 10))
+    LENGTHS = [int(1.5 ** i) for i in range(18)]
+    # LENGTHS = [(2 ** i) for i in range(13)]
+    # LENGTHS = list(range(0, 10)) + list(range(10, 1000, 10))
     
 def main() -> None:
 
