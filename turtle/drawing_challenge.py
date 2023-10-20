@@ -36,7 +36,7 @@ def draw_diamond(s: ShapeDrawer, num_of_lines = 10, line_gap_distance = 50, pos 
             draw_diamond_corner(s, num_of_lines, line_gap_distance, pos, x_rotation, y_rotation)
 
 def reset(s: ShapeDrawer, delay_seconds=0):
-    # turtle.delay(delay_seconds * 1000)
+    turtle.delay(delay_seconds * 1000)
     s.reset()
     s.tur.clear()
 
@@ -47,16 +47,16 @@ def main():
     s.tur.color("chartreuse")
     s.tur.speed(0)
     
-    wait = 0.5
+    wait = 1
     
-    # draw_checkers(s, dimension=5, move_to_center = True)
-    # reset(s, delay_seconds=wait)
+    draw_checkers(s, dimension=5, move_to_center = True)
+    reset(s, delay_seconds=wait)
     
-    # draw_boxes(s, num_of_boxes=5)
-    # reset(s, delay_seconds=wait)
+    draw_boxes(s, num_of_boxes=5)
+    reset(s, delay_seconds=wait)
     
-    # draw_snail(s, num_of_circles=100)
-    # reset(s, delay_seconds=wait)
+    draw_snail(s, num_of_circles=100)
+    reset(s, delay_seconds=wait)
     
     draw_diamond(s, num_of_lines=10, line_gap_distance=20)    
     
