@@ -45,8 +45,8 @@ def main():
     turtle.tracer(False)
     
     distance = 7
-    num_of_walkers = 30
-    num_of_steps = 100
+    num_of_walkers = 15
+    num_of_steps = 175
     
     turtle.tracer(False)
     
@@ -82,10 +82,14 @@ def main():
         turtle.update()
     
     num_of_bins = num_of_walkers
-    
+        
     df = pd.DataFrame({sides: [walker.get_distance_from_start() for walker in walker_group] for sides, walker_group in walker_groups.items()})
     df2 = df[sorted(list(walker_groups.keys()))]
     df2.plot.hist(stacked=True, bins=num_of_bins)
+    
+    plt.title("Distance traveled by different number of directions")
+    plt.xlabel("Distance")
+    
     plt.show()
                  
 def graph_distance(num_of_walkers = 100, shape_sides = 4, num_of_steps = 50, distance = 10):    
@@ -97,7 +101,7 @@ def graph_distance(num_of_walkers = 100, shape_sides = 4, num_of_steps = 50, dis
     turtle.tracer(False)
     
     walkers = [Walker(shape_sides, distance) for i in range(num_of_walkers)]
-    
+     
     for i in range(num_of_steps):
         for walker in walkers:
             walker.step()
