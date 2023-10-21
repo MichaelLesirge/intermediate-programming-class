@@ -2,7 +2,10 @@
 Sorting unit of are intermediate programming proggraming class. Implemented bubble sort, insertion sort, selection sort, merge sort (with and without copies), and quick sort. I also made a visulizer for the time taken for each and for the time it takes them to sort.
 
 ## Sorting Animation
-![Sorting Animation Video](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/4ac856cb-fb84-4045-9021-9cc4b3768e25)
+Sorting 20 element long lists
+![All Sort 20](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/c9f1508f-14bf-4768-ae6e-4e8d950b778c)
+Quick and Merge on 100 element long lists
+![Quick and Merge 100 long list](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/383f2dd2-ad0f-4029-8c64-b0f5b3bf38fc)
 
 
 ## Time Graph
