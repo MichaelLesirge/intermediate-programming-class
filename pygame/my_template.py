@@ -22,10 +22,11 @@ pygame.display.set_caption(Config.NAME)
 class Sprite(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
-    
-    def update(self) -> None:
         self.image = pygame.Surface()
         self.rect = self.image.get_rect()
+    
+    def update(self) -> None:
+        pass
 
 def main():
     running = True

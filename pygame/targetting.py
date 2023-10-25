@@ -15,20 +15,34 @@ class Config:
 
     FPS = 60
     BACKGROUND_COLOR = (255, 255, 255)
+    
+    METER = 50
 
 screen = pygame.display.set_mode((Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
 pygame.display.set_caption(Config.NAME)
 
-class Sprite(pygame.sprite.Sprite):
+class TennisBall(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
-    
-    def update(self) -> None:
         self.image = pygame.Surface()
         self.rect = self.image.get_rect()
+    
+    def update(self) -> None:
+        pass
+        
+class Target(pygame.sprite.Sprite):
+    def __init__(self) -> None:
+        super().__init__()
+        self.image = pygame.Surface()
+        self.rect = self.image.get_rect()
+    
+    def update(self) -> None:
+        pass
 
 def main():
     running = True
+    
+    show_distance_line = True
     
     clock = pygame.time.Clock()
     
