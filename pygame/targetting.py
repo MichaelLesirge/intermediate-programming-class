@@ -21,7 +21,7 @@ class Config:
 screen = pygame.display.set_mode((Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT))
 pygame.display.set_caption(Config.NAME)
 
-class TennisBall(pygame.sprite.Sprite):
+class Target(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
         
@@ -33,10 +33,12 @@ class TennisBall(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
     
     def update(self) -> None:
-        pygame.draw.circle(self.image, self.color, pygame.mouse.get_pos(), self.width // 2)
+        x, y = pygame.mouse.get_pos()
+        radius = self.width // 2
+        self.rect = pygame.draw.circle(self.image, self.color, (x - radius, y - radius), radius)
         
         
-class Target(pygame.sprite.Sprite):
+class TennisBall(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
         self.image = pygame.Surface()
@@ -70,7 +72,7 @@ def main():
 
         screen.fill(Config.BACKGROUND_COLOR)
         sprites.update()
-        sprites.draw()
+        sprites.draw(screen)
          
         pygame.display.flip()
 

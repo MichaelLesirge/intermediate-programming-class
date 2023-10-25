@@ -49,7 +49,7 @@ def main():
         sprites.update()
         
         screen.fill(Config.BACKGROUND_COLOR)
-        sprites.draw()    
+        sprites.draw(screen)    
         
         pygame.display.flip()
 
