@@ -33,8 +33,8 @@ def main():
     
     clock = pygame.time.Clock()
     
-    balls = pygame.sprite.Group()
-    balls.add()
+    sprites = pygame.sprite.Group()
+    sprites.add()
     
     while running:
         for event in pygame.event.get():
@@ -46,8 +46,11 @@ def main():
                         case pygame.K_SPACE:
                             running = False
                             
+        sprites.update()
+        
         screen.fill(Config.BACKGROUND_COLOR)
-            
+        sprites.draw()    
+        
         pygame.display.flip()
 
         clock.tick(Config.FPS)

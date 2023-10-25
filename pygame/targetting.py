@@ -24,11 +24,17 @@ pygame.display.set_caption(Config.NAME)
 class TennisBall(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
-        self.image = pygame.Surface()
+        
+        self.width = 10
+        self.color = (100, 0, 0)
+        
+        self.image = pygame.Surface((self.width, self.width))
+        self.image.fill(self.color)
         self.rect = self.image.get_rect()
     
     def update(self) -> None:
-        pass
+        pygame.draw.circle(self.image, self.color, pygame.mouse.get_pos(), self.width // 2)
+        
         
 class Target(pygame.sprite.Sprite):
     def __init__(self) -> None:
@@ -46,8 +52,11 @@ def main():
     
     clock = pygame.time.Clock()
     
-    balls = pygame.sprite.Group()
-    balls.add()
+    sprites = pygame.sprite.Group()
+    
+    target = Target()
+    
+    sprites.add(target)
     
     while running:
         for event in pygame.event.get():
@@ -60,7 +69,9 @@ def main():
                             running = False
 
         screen.fill(Config.BACKGROUND_COLOR)
-            
+        sprites.update()
+        sprites.draw()
+         
         pygame.display.flip()
 
         clock.tick(Config.FPS)
