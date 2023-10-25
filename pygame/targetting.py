@@ -45,11 +45,14 @@ def main():
                         case pygame.K_SPACE:
                             running = False
 
-            screen.fill(Config.BACKGROUND_COLOR)
+        screen.fill(Config.BACKGROUND_COLOR)
             
-            pygame.display.flip()
+        pygame.display.flip()
 
         clock.tick(Config.FPS)
 
 
     pygame.quit()
+
+if __name__ == "__main__":
+    main()

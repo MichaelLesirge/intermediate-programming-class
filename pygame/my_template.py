@@ -5,7 +5,7 @@ import math
 pygame.init()
 
 class Config:
-    NAME = "Targeting"
+    NAME = "Template"
     
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 600
@@ -44,12 +44,15 @@ def main():
                     match event.key:
                         case pygame.K_SPACE:
                             running = False
-
-            screen.fill(Config.BACKGROUND_COLOR)
+                            
+        screen.fill(Config.BACKGROUND_COLOR)
             
-            pygame.display.flip()
+        pygame.display.flip()
 
         clock.tick(Config.FPS)
 
 
     pygame.quit()
+
+if __name__ == "__main__":
+    main()
