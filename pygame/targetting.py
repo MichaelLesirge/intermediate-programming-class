@@ -17,7 +17,7 @@ class Settings:
 
     SCREEN_WIDTH, SCREEN_HEIGHT = 21 * UNIT, 15 * UNIT
 
-    BALL_VELOCITY = 400
+    BALL_VELOCITY = 1200
 
     DRAW_GRID = True
 
@@ -29,18 +29,20 @@ class Settings:
 
     LINE_COLOR = (100, 100, 100)
 
-    NUM_OF_TARGETS = 10
+    NUM_OF_TARGETS = 0
 
 class Target(pygame.sprite.Sprite):
     COLOR = (255, 0, 0)
     SIZE = 0.2 * UNIT
 
-    def __init__(self, location: tuple[int, int]) -> None:
+    def __init__(self, location: tuple[int, int], color = COLOR) -> None:
         super().__init__()
                 
         self.image = pygame.Surface((self.SIZE, self.SIZE))
+        self.image.fill(color)
+        
         self.rect = self.image.get_rect(center = location)
-        pygame.draw.rect(self.image, self.COLOR, self.rect)
+        pygame.draw.rect(self.image, color, self.rect)
 
     def update(self, bullets: pygame.sprite.Group) -> None:
         hit_by = pygame.sprite.spritecollide(self, bullets, dokill=False)
@@ -49,8 +51,9 @@ class Target(pygame.sprite.Sprite):
 def random_position() -> tuple[int, int]:
     return (random.randrange(0, Settings.SCREEN_WIDTH, UNIT) + UNIT / 2, random.randrange(0, Settings.SCREEN_HEIGHT, UNIT) + UNIT / 2)
 
-def on_screen(rect: pygame.Rect, off_by: int = 0) -> bool:
-    return (-off_by < rect.x < Settings.SCREEN_WIDTH + off_by) and (-off_by < rect.y < Settings.SCREEN_HEIGHT + off_by)
+def on_screen(location: tuple[int, int], off_by: int = 0) -> bool:
+    x, y = location
+    return (-off_by < x < Settings.SCREEN_WIDTH + off_by) and (-off_by < y < Settings.SCREEN_HEIGHT + off_by)
 
 class Bullet(pygame.sprite.Sprite):
     COLOR_DEFAULT = (0, 0, 0)
@@ -83,8 +86,18 @@ class Bullet(pygame.sprite.Sprite):
         self.x, self.y = self.find_position(self.time)
         self.rect.center = (int(self.x), int(self.y))
         
-        if not on_screen(self.rect, 250):
+        if not on_screen(self.rect.center, 250):
             self.kill()
+
+class Tracer(Bullet):
+
+    def find_end_time(self, target: pygame.Rect) -> float:
+        end = None
+        while end is None and on_screen(self.rect.center, 250):
+            self.update()
+            if self.rect.colliderect(target):
+                end = self.time
+        return end
 
 class Shooter(pygame.sprite.Sprite):
     COLOR = (0, 0, 0)
@@ -92,7 +105,7 @@ class Shooter(pygame.sprite.Sprite):
     
     COOL_DOWN = 0.25
     
-    def __init__(self, location: tuple[int, int]) -> None:
+    def __init__(self, location: tuple[int, int], color = COLOR) -> None:
         super().__init__()
 
         self.x, self.y = location
@@ -102,7 +115,7 @@ class Shooter(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.RADIUS * 2, self.RADIUS * 2), pygame.SRCALPHA, 32).convert_alpha()
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
-        pygame.draw.circle(self.image, self.COLOR, (self.RADIUS, self.RADIUS), self.RADIUS, 3)
+        pygame.draw.circle(self.image, color, (self.RADIUS, self.RADIUS), self.RADIUS, 3)
 
     def find_angle(self, target: tuple[int, int], aim_assist: bool, velocity: float) -> float:
         target_x, target_y = target
@@ -165,6 +178,8 @@ def main() -> None:
     targets = pygame.sprite.Group()
      
     going = True
+    
+    display_mode = False
 
     while going:     
                 
@@ -183,11 +198,9 @@ def main() -> None:
                 if event.key == pygame.K_t:
                     targets.add(Target(random_position()))
                 elif event.key == pygame.K_r:
-                    targets.add(Target(pygame.mouse.get_pos()))
-        
-        if pygame.key.get_pressed()[pygame.K_m]:
-            x, y = pygame.mouse.get_pos()
-            
+                    targets.add(Target(pygame.mouse.get_pos())) 
+                elif event.key == pygame.K_m:
+                    display_mode = not display_mode
 
         if Settings.AUTO_FIRE_MODE and targets:
             for shooter in shooters:
@@ -204,12 +217,42 @@ def main() -> None:
         shooters.update()
 
         screen.fill(Settings.BACKGROUND)
+
         if Settings.DRAW_GRID:
             for x in range(UNIT, Settings.SCREEN_WIDTH, UNIT):
                 pygame.draw.line(screen, Settings.LINE_COLOR, (x, 0), (x, Settings.SCREEN_HEIGHT))
             for y in range(UNIT, Settings.SCREEN_HEIGHT, UNIT):
                 pygame.draw.line(screen, Settings.LINE_COLOR, (0, y), (Settings.SCREEN_WIDTH, y))
-
+                
+        if display_mode:
+            shooter: Shooter = shooters.sprites()[-1]
+            mouse = pygame.mouse.get_pos()
+            
+            x, y = shooter.rect.center
+            tx, ty = mouse
+            
+            angle = shooter.find_angle(mouse, True, Settings.BALL_VELOCITY)
+            
+            target = Target(mouse, color=("green" if angle else "red"))
+            screen.blit(target.image, target.rect)
+            
+            if angle:
+                tracer = Tracer((x, y), Settings.BALL_VELOCITY, angle)
+                time = tracer.find_end_time(target)
+                time_chunk = time / 10
+                while time >= 0:
+                    pygame.draw.circle(screen, "grey", tracer.find_position(time), 4)
+                    time -= time_chunk
+                
+                        
+            pygame.draw.line(screen, "grey", (x, y), (tx, ty), 4)
+            
+            pygame.draw.line(screen, "grey", (x, y), (tx, y), 2)
+            pygame.draw.line(screen, "grey", (tx, y), (tx, ty), 2)
+            
+            box_size = 10
+            pygame.draw.rect(screen, "grey", pygame.Rect(tx + [0, -box_size][tx > x], y - [box_size, 0][ty > y], box_size, box_size), 2)
+            
         bullets.draw(screen)
         targets.draw(screen)
         shooters.draw(screen)
