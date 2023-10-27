@@ -18,10 +18,8 @@ class Settings:
     SHOOTER_START = [(6 * UNIT, 13 * UNIT)]
     SCREEN_WIDTH, SCREEN_HEIGHT = 21 * UNIT, 15 * UNIT
 
-    BALL_VELOCITY = 600
+    BALL_VELOCITY = 11.5 * UNIT
     
-    FLOOR_LEVEL = 15 * UNIT
-
     DRAW_GRID = True
 
     AUTO_FIRE_MODE = True
@@ -254,7 +252,6 @@ def main() -> None:
             angle = shooter.find_angle(mouse, aim_assist, Settings.BALL_VELOCITY)
             
             target = Target(mouse, color=("green" if angle else "red"))
-            screen.blit(target.image, target.rect)
             
             color = (52, 161, 235)
             
@@ -274,6 +271,7 @@ def main() -> None:
             
             box_size = 10
             pygame.draw.rect(screen, color, pygame.Rect(tx + [0, -box_size][tx > x], y - [box_size, 0][ty > y], box_size, box_size), 2)
+            screen.blit(target.image, target.rect)
             
         bullets.draw(screen)
         targets.draw(screen)
