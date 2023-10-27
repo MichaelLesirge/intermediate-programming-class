@@ -1,125 +1,103 @@
 # Math and code for this done by much smarter friend, I only cleaned it up
 
 import pygame
-import sys
 import math
 import random
 import enum
 
-class Colors:
-    LINE_COLOR = (100, 100, 100)
-    BACKGROUND = (255, 255, 255)
-    
-    DEFAULT_BULLET_COLOR = (0, 0, 0)
-    PLAYER_BULLET_COLOR = (0, 100, 255)
+UNIT = 50
 
+class PhysicsConstants:
+    GRAVITY = 9.81 * UNIT
+   
 class AimTypes(enum.Enum):
     AIMED = enum.auto()
     MANUAL = enum.auto()
+   
+class Settings:
+    FPS = 1000
+    
+    SCREEN_WIDTH, SCREEN_HEIGHT = 20 * UNIT, 15 * UNIT
 
-def new_target(init_x="r", init_y="r"):
-    global targets, shooters, should_auto_shoot
-    if len(shooters) > 0:
-        if init_x == "r":
-            x, y = 525+50*random.randint(-10, 10), 375+50*random.randint(-4, 6)
-        else:
-            x, y = init_x, init_y
-        target = Target(x, y)
-        targets.append(target)
+    AIM_TYPE = AimTypes.AIMED
+    DRAW_GRID = True
+    
+    BACKGROUND = (255, 255, 255)
+    
+    LINE_COLOR = (100, 100, 100)
+    
+    
+    NUM_OF_TARGETS = 0
+ 
+class Target(pygame.sprite.Sprite):
+    COLOR = (255, 0, 0)
+    SIZE = 0.5 * UNIT 
+    
+    def __init__(self, location):
+        super().__init__()
+        self.x, self.y = location
+                        
+        self.image = pygame.Surface((self.SIZE, self.SIZE))
+        self.rect = pygame.Rect(self.x, self.y, self.SIZE, self.SIZE)
 
-        new = random.choice(shooters).new_bullet(x, y, target=target, color=Colors.DEFAULT_BULLET_COLOR)
+    def update(self, bullets):
+        hits = pygame.sprite.spritecollide(self, bullets, dokill=True)
+        # if hits: self.kill()
 
-        if new:
-            if should_auto_shoot:
-                bullets.append(new)
-        else:
-            for shooter in shooters:
-                new = shooter.new_bullet(x, y, target=target, color=Colors.DEFAULT_BULLET_COLOR)
-                if new:
-                    if should_auto_shoot:
-                        bullets.append(new)
-                    break
-            if not new:
-                targets.remove(target)
-                if init_x == "r":
-                    new_target()
-
-
-class Target:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def rect(self):
-        return pygame.Rect(self.x-meter/6, self.y-meter/6, meter/3, meter/3)
-
-    def display_rect(self, camx, camy, scale=1):
-        return pygame.Rect((self.x-meter/6-camx)*scale, (self.y-meter/6-camy)*scale, scale*meter/3, scale*meter/3)
-
-    def draw(self, w, camx, camy, scale=1):
-        pygame.draw.rect(w, (255, 0, 0), self.display_rect(
-            camx, camy, scale=scale), 2)
-
-
-class Bullet:
-    def __init__(self, x, y, v, angle, target=False, color = (0, 0, 0)):
-        self.t = 0
-        self.x, self.y = x, y
-        self.init_x, self.init_y = x, y
-        self.init_v = v
+class Bullet(pygame.sprite.Sprite):
+    COLOR = (0, 100, 255)
+    RADIUS = 0.1 * UNIT
+    
+    def __init__(self, location, velocity, angle):
+        super().__init__()
+        self.time = 0
+        self.init_x, self.init_y = location
+        self.x, self.y = self.init_x, self.init_y
+        self.init_v = velocity
         
         self.angle = angle
-        self.target = target
-        self.color = color
+                
+        self.image = pygame.Surface((self.RADIUS*2, self.RADIUS*2))
+        self.rect = self.image.get_rect()
 
-    def move(self, bullets, targets):
-        self.t += 1/fps
-        self.x = self.init_x+self.init_v*self.t*math.cos(self.angle)
-        self.y = self.init_y+self.init_v*self.t * \
-            math.sin(self.angle)+(g/2*pow(self.t, 2))
-        rect = pygame.Rect(self.x-meter/10, self.y-meter/10, meter/5, meter/5)
-        if self.target:
-            if rect.colliderect(self.target.rect()):
-                i = 0
-                while i < len(targets):
-                    if rect.colliderect(targets[i].rect()):
-                        targets.remove(targets[i])
-                        new_target()
-                        if self in bullets:
-                            bullets.remove(self)
-                    else:
-                        i += 1
-                self.target = False
-        else:
-            for target in targets:
-                if rect.colliderect(target.rect()):
-                    targets.remove(target)
-                    bullets.remove(self)
-                    new_target()
-                    break
-
-    def draw(self, w, camera_x, camera_y, scale=1):
-        pygame.draw.circle(w, self.color, (scale*(self.x-camera_x),
-                           scale*(self.y-camera_y)), scale*meter/10, 2)
+    def update(self):
+        self.time += 1/Settings.FPS
+        self.x = self.init_x+self.init_v*self.time*math.cos(self.angle)
+        self.y = self.init_y+self.init_v*self.time * math.sin(self.angle)+(PhysicsConstants.GRAVITY/2*pow(self.time, 2))
+         
+        pygame.draw.circle(self.image, self.COLOR, (int(self.x), int(self.y)), int(self.RADIUS), 2)
 
 
-class Shooter:
-    def __init__(self, x, y):
-        self.x, self.y = x, y
-
-    def new_bullet(self, tx, ty, aim_type: AimTypes = AimTypes.AIMED, v=400, target=False, color=(0, 0, 0)):
-        x = tx-self.x
-        y = ty-self.y
+class Shooter(pygame.sprite.Sprite):
+    COLOR = (0, 0, 0)
+    RADIUS = 0.5 * UNIT
+    
+    def __init__(self, location):
+        super().__init__()
+        
+        self.x, self.y = location
+            
+        self.image = pygame.Surface((self.RADIUS * 2, self.RADIUS * 2), pygame.SRCALPHA, 32).convert_alpha()
+        self.rect = self.image.get_rect(center = (self.x, self.y))
+           
+        pygame.draw.circle(self.image, self.COLOR, (self.RADIUS, self.RADIUS), self.RADIUS, 3)  
+    
+    def shoot(self, target_x, target_y, aim_type: AimTypes = AimTypes.AIMED, velocity=400):
+        x = target_x - self.x
+        y = target_y - self.y
 
         match aim_type:
             case AimTypes.MANUAL:
                 angle = math.atan(y/x)
-                if tx-self.x < 0:
+                if target_x-self.x < 0:
                     angle += math.pi
+                    
             case AimTypes.AIMED:
-                a = g*x*x*y/v/v+x*x
-                b = g*g*pow(x/v, 4)
+                
+                a = PhysicsConstants.GRAVITY*x*x*y/velocity/velocity+x*x
+                b = PhysicsConstants.GRAVITY*PhysicsConstants.GRAVITY*pow(x/velocity, 4)
                 c = x*x+y*y
+                
                 if c == 0:
                     angle = -math.pi/2
                 else:
@@ -131,148 +109,66 @@ class Shooter:
                         angle = math.acos(cos)
                         if x == 0:
                             if y < 0:
-                                if y < v*v/2/g:
-                                    print("Impossible location")
+                                if y < velocity*velocity/2/PhysicsConstants.GRAVITY:
                                     return
                                 angle *= -1
-                        elif cos*(y-g*x*x/2/v/v/cos/cos)/x < 0:
+                        elif cos*(y-PhysicsConstants.GRAVITY*x*x/2/velocity/velocity/cos/cos)/x < 0:
                             angle *= -1
-                    except:
-                        print("Impossible location")
+                    except TypeError:
                         return
 
-        return Bullet(self.x, self.y, v, angle, target=target, color=color)
-
-    def draw(self, w, camx, camy, scale=1):
-        pygame.draw.circle(w, (0, 0, 0), (scale*(self.x-camx),
-                           scale*(self.y-camy)), scale*meter/2, 2)
-
-
-def draw_all(screen, camera_x, camera_y, shooters, bullets, targets, grid=True):
-    screen.fill(Colors.BACKGROUND)
-    width = screen.get_width()
-    height = screen.get_height()
-    if grid:
-        for i in range(math.ceil(height/(meter*scale))):
-            pygame.draw.line(screen, Colors.LINE_COLOR, (0, scale*(-camera_y %
-                             meter+(i)*meter)), (width, scale*(-camera_y % meter+(i)*meter)))
-        for i in range(math.ceil(width/(meter*scale))):
-            pygame.draw.line(screen, Colors.LINE_COLOR, (scale*((i+1)*meter-(camera_x %
-                             meter)), 0), (scale*((i+1)*meter-(camera_x % meter)), height))
-
-    for target in targets:
-        target.draw(screen, camera_x, camera_y, scale=scale)
-    for bullet in bullets:
-        bullet.draw(screen, camera_x, camera_y, scale=scale)
-    for shooter in shooters:
-        shooter.draw(screen, camera_x, camera_y, scale=scale)
- 
-# controls
-up, down, left, right, zoom_out, zoom_in = False, False, False, False, False, False
-
-# constants
-meter = 50
-scale = 1
-g = 9.81*meter
-fps = 1000
-
-w = pygame.display.set_mode([1000, 750])
-clock = pygame.time.Clock()
-
-aim_type = AimTypes.AIMED
-
-should_auto_shoot = False
-
-number_of_targets = 10
-
-sx, sy = 0, 0
-x, y = 0, 0
-speed_x, speed_y = 0, 0
-camera_x, camera_y = 25, 25
-
-shooters = [Shooter(525, 375)]
-bullets = []
-targets = []
-for i in range(number_of_targets):
-    new_target()
-    pass
-
-while True:
-    for event in pygame.event.get():
-        match event.type:
-            case pygame.QUIT:
-                sys.exit()
-            case pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                shooters.append(Shooter(x/scale+camera_x, y/scale+camera_y))
-            case pygame.KEYDOWN:
-                match event.key:
-                    case pygame.K_SPACE:
-                        x, y = pygame.mouse.get_pos()
-                        for shooter in shooters:
-                            new = shooter.new_bullet(
-                                x/scale+camera_x, y/scale+camera_y, color=Colors.PLAYER_BULLET_COLOR, aim_type=aim_type)
-                            if new:
-                                bullets.append(new)
-                    case pygame.K_w:
-                        up = True
-                    case pygame.K_s:
-                        down = True
-                    case pygame.K_a:
-                        left = True
-                    case pygame.K_d:
-                        right = True
-                    case pygame.K_UP:
-                        zoom_in = True
-                    case pygame.K_DOWN:
-                        zoom_out = True
-            case pygame.KEYUP:
-                match event.key:
-                    case pygame.K_w:
-                        up = False
-                    case pygame.K_s:
-                        down = False
-                    case pygame.K_a:
-                        left = False
-                    case pygame.K_d:
-                        right = False
-                    case pygame.K_UP:
-                        zoom_in = False
-                    case pygame.K_DOWN:
-                        zoom_out = False
-
-    speed_x = (speed_x*pow(0.6, 30/fps))
-    speed_y = (speed_y*pow(0.6, 30/fps))
-
-    if up:
-        speed_y -= 80/fps
-    if down:
-        speed_y += 80/fps
-    if left:
-        speed_x -= 80/fps
-    if right:
-        speed_x += 80/fps
-
-    if zoom_in or zoom_out:
-        cx = camera_x+w.get_width()/2/scale
-        cy = camera_y+w.get_height()/2/scale
-        if zoom_in: scale *= pow(1.25, 5/fps)
-        if zoom_out: scale *= pow(0.8, 5/fps)
-        camera_x = cx-w.get_width()/2/scale
-        camera_y = cy-w.get_height()/2/scale
-
-    camera_y += speed_y
-    camera_x += speed_x
-
-    for bullet in bullets:
-        bullet.move(bullets, targets)
-
-    draw_all(w, camera_x, camera_y, shooters, bullets, targets, (x, y))
-    pygame.display.flip()
-    clock.tick(fps)
+        return Bullet((self.x, self.y), velocity, angle)
 
 def main() -> None:
-    pass
+    width, height = Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT
+    screen = pygame.display.set_mode((width, height))
+    clock = pygame.time.Clock()
+
+    shooters = pygame.sprite.Group()
+
+    def random_pos() -> tuple[int, int]:
+        return random.randrange(UNIT, width, UNIT), random.randrange(UNIT, width, UNIT)
+        
+    shooters.add(Shooter(random_pos()))
+
+    bullets = pygame.sprite.Group()
+    targets = pygame.sprite.Group()
+
+    for i in range(Settings.NUM_OF_TARGETS):
+        target = Target(random_pos())
+        targets.add(target)
+
+    going = True
+
+    while going:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                going = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                shooters.add(Shooter(pygame.mouse.get_pos()))
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                x, y = pygame.mouse.get_pos()
+                for shooter in shooters:
+                    bullets.add(shooter.shoot(x, y, Settings.AIM_TYPE, velocity = 400))
+
+        bullets.update()
+        targets.update(bullets)
+        shooters.update()
+        
+        screen.fill(Settings.BACKGROUND)
+        if Settings.DRAW_GRID:
+            for x in range(UNIT, Settings.SCREEN_WIDTH, UNIT):
+                pygame.draw.line(screen, Settings.LINE_COLOR, (x, 0), (x, Settings.SCREEN_HEIGHT))
+            for y in range(UNIT, Settings.SCREEN_HEIGHT, UNIT):
+                pygame.draw.line(screen, Settings.LINE_COLOR, (0, y), (Settings.SCREEN_WIDTH, y))
+        
+        bullets.draw(screen)
+        targets.draw(screen)
+        shooters.draw(screen)
+        
+        pygame.display.flip()
+        clock.tick(Settings.FPS)
+
 
 if __name__ == "__main__":
     main()
