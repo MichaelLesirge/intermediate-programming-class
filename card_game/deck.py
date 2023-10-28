@@ -35,7 +35,7 @@ class Card:
     def __str__(self) -> str:
         return color.make_color(f"{self.suite}{self.rank}", self.suite.color)
 
-class Deck:
+class CardGroup:
     def __init__(self) -> None:
         self.reset()
     
@@ -44,6 +44,9 @@ class Deck:
     
     def shuffle(self) -> None:
         random.shuffle(self.deck)
+
+class Deck(CardGroup):
+    pass
     
 card1 = Card(rank.ACE, suite.Clubs)
 card2 = Card(rank.KING, suite.Hearts)
