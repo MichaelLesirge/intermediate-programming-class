@@ -25,7 +25,7 @@ class Settings:
     AUTO_FIRE_MODE = True
         
     AIM_ASSIST_START = True
-    EFFICIENT_MODE = True
+    HIGH_ARK_MODE = False
 
     BACKGROUND = (255, 255, 255)
 
@@ -129,6 +129,8 @@ class Shooter(pygame.sprite.Sprite):
         target_x, target_y = target
         x = target_x - self.x
         y = target_y - self.y
+        
+        if x == 0: return [3 * math.pi / 2, math.pi / 2][y > 0]
 
         if aim_assist:
             a = PhysicsConstants.GRAVITY*x*x*y/velocity/velocity+x*x
@@ -136,29 +138,25 @@ class Shooter(pygame.sprite.Sprite):
             c = x*x+y*y
 
             if c == 0:
-                angle = -math.pi/2
-            else:
-                if Settings.EFFICIENT_MODE:
-                    cos = pow((a+pow(pow(a, 2)-b*c, 1/2))/(2*c), 1/2)
-                else:
-                    cos = pow((a-pow(pow(a, 2)-b*c, 1/2))/(2*c), 1/2)
-                
-                if x < 0:
-                    cos *= -1
-                try:
-                    # angle is negative of reality because pygame has up/down switched
-                    angle = math.acos(cos)
-                    if x == 0:
-                        if y < 0:
-                            if y < velocity*velocity/2/PhysicsConstants.GRAVITY:
-                                return
-                            angle *= -1
-                    elif cos*(y-PhysicsConstants.GRAVITY*x*x/2/velocity/velocity/cos/cos)/x < 0:
+                return -math.pi/2
+            
+            cos = pow((a + pow(pow(a, 2)-b*c, 1/2) * [1, -1][Settings.HIGH_ARK_MODE])/(2*c), 1/2)
+                        
+            if x < 0:
+                cos *= -1
+            try:
+                # angle is negative of reality because pygame has up/down switched
+                angle = math.acos(cos)
+                if x == 0:
+                    if y < 0:
+                        if y < velocity*velocity/2/PhysicsConstants.GRAVITY:
+                            return
                         angle *= -1
-                except TypeError:
-                    return
+                elif cos*(y-PhysicsConstants.GRAVITY*x*x/2/velocity/velocity/cos/cos)/x < 0:
+                    angle *= -1
+            except TypeError:
+                return
         else:
-            if x == 0: return 3 * math.pi / 2
             angle = math.atan(y/x)
             if target_x-self.x < 0:
                 angle += math.pi
@@ -178,6 +176,9 @@ class Shooter(pygame.sprite.Sprite):
 def main() -> None:
     width, height = Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT
 
+    pygame.font.init()
+    font = pygame.font.Font('freesansbold.ttf', 16)
+    
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
 
@@ -256,22 +257,40 @@ def main() -> None:
             color = (52, 161, 235)
             
             if angle:
+                angle_degrees = (angle % (2*math.pi)) * (180/math.pi)
+
+                angle_degrees_from_ground = (angle_degrees + 90) % 360
+                if angle_degrees_from_ground > 180: angle_degrees_from_ground = 360 - angle_degrees_from_ground
+                angle_degrees_from_ground = -(angle_degrees_from_ground - 90)
+                
+                fire_angle_text = font.render(f"Fire at {angle_degrees_from_ground:.0f}°", True, "black")
+                
                 tracer = Tracer((x, y), Settings.BALL_VELOCITY, angle)
                 time = tracer.find_end_time(target)
                 time_chunk = time / 10
+                
+                
                 while time >= 0:
                     pygame.draw.circle(screen, color, tracer.find_position(time), 4)
                     time -= time_chunk
                     
                         
-            pygame.draw.line(screen, color, (x, y), (tx, ty), 4)
+            pygame.draw.line(screen, color, (x, y), (tx, ty), 2)
             
-            pygame.draw.line(screen, color, (x, y), (tx, y), 2)
-            pygame.draw.line(screen, color, (tx, y), (tx, ty), 2)
+            pygame.draw.line(screen, color, (x, y), (tx, y), 3)
+            pygame.draw.line(screen, color, (tx, y), (tx, ty), 3)
             
-            box_size = 10
-            pygame.draw.rect(screen, color, pygame.Rect(tx + [0, -box_size][tx > x], y - [box_size, 0][ty > y], box_size, box_size), 2)
+            max_box_size = 10
+            min_distance = min(abs(tx - x), abs(ty-y))
+            
+            if min_distance != 0:
+                box_size = min(max_box_size, min_distance)
+                pygame.draw.rect(screen, color, pygame.Rect(tx + [0, -box_size][tx > x], y - [box_size, 0][ty > y], box_size, box_size), 2)
+            
             screen.blit(target.image, target.rect)
+            
+            if angle:
+                screen.blit(fire_angle_text, (shooter.rect.centerx - fire_angle_text.get_rect().width/2, shooter.rect.centery - fire_angle_text.get_rect().height/2 + shooter.rect.height))
             
         bullets.draw(screen)
         targets.draw(screen)
