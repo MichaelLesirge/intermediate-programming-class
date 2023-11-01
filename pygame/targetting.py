@@ -1,5 +1,6 @@
 # Math and code for this done by much smarter friend, I only cleaned it up
 
+from typing import Any
 import pygame
 
 import math
@@ -7,7 +8,6 @@ import random
 import time
 
 UNIT = 50
-
 
 class PhysicsConstants:
     GRAVITY = 9.81 * UNIT
@@ -32,6 +32,11 @@ class Settings:
     LINE_COLOR = (100, 100, 100)
 
     NUM_OF_TARGETS = 0
+
+pygame.init()
+CLOCK = pygame.time.Clock()
+
+FONT = pygame.font.Font('freesansbold.ttf', 16)
 
 class Target(pygame.sprite.Sprite):
     COLOR = (255, 0, 0)
@@ -62,6 +67,8 @@ class Bullet(pygame.sprite.Sprite):
     COLOR_SPECIAL = (0, 155, 255)
     RADIUS = 0.1 * UNIT
 
+    KILL_OUTSIDE = UNIT * 20
+
     def __init__(self, location: tuple[int, int], velocity: float, angle: float, color: pygame.Color = COLOR_DEFAULT) -> None:
         super().__init__()
         self.time = 0
@@ -88,21 +95,12 @@ class Bullet(pygame.sprite.Sprite):
         self.x, self.y = self.find_position(self.time)
         self.rect.center = (int(self.x), int(self.y))
         
-        if not on_screen(self.rect.center, 250):
+        if not on_screen(self.rect.center, self.KILL_OUTSIDE):
             self.kill()
 
-class Tracer(Bullet):
-
-    def find_hit_time(self, target: pygame.Rect) -> float:
-        end = None
-        while end is None and on_screen(self.rect.center, 250):
-            self.update()
-            if self.rect.colliderect(target):
-                end = self.time
-        return end
-    
+class Tracer(Bullet):    
     def find_end_time(self, target: pygame.Rect) -> float:
-        while on_screen(self.rect.center, 250):
+        while on_screen(self.rect.center, self.KILL_OUTSIDE):
             self.update()
             if self.rect.colliderect(target): break
         return self.time
@@ -110,6 +108,7 @@ class Tracer(Bullet):
 class Shooter(pygame.sprite.Sprite):
     COLOR = (0, 0, 0)
     RADIUS = 0.5 * UNIT
+    BARREL_SIZE = (RADIUS, 3)
     
     COOL_DOWN = 0.25
     
@@ -120,10 +119,26 @@ class Shooter(pygame.sprite.Sprite):
         
         self.next_fire_time = time.time() + self.COOL_DOWN
 
-        self.image = pygame.Surface((self.RADIUS * 2, self.RADIUS * 2), pygame.SRCALPHA, 32).convert_alpha()
-        self.rect = self.image.get_rect(center=(self.x, self.y))
-
+        self.image = pygame.Surface((self.RADIUS * 2 , self.RADIUS * 2), pygame.SRCALPHA, 32).convert_alpha()
+        
+        
+        self.angle = 0
+        
+        # pygame.draw.circle(self.image, Settings.BACKGROUND, (self.RADIUS, self.RADIUS), self.RADIUS)
         pygame.draw.circle(self.image, color, (self.RADIUS, self.RADIUS), self.RADIUS, 3)
+        pygame.draw.rect(self.image, color, pygame.Rect((self.RADIUS, self.RADIUS - self.BARREL_SIZE[1] / 2), self.BARREL_SIZE))
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+        
+        self.image = pygame.transform.rotate(self.image, self.angle)
+        
+        self.image_start = self.image
+        
+    def update(self) -> None:
+        angle_degrees = (self.angle * 180 / math.pi) % 360
+        self.image = pygame.transform.rotate(self.image_start, -angle_degrees)
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x, self.y)
+        
 
     def find_angle(self, target: tuple[int, int], aim_assist: bool, velocity: float) -> float:
         target_x, target_y = target
@@ -170,17 +185,79 @@ class Shooter(pygame.sprite.Sprite):
         angle = self.find_angle(target, aim_assist, velocity)
         
         if angle is None: return
-        
+            
+        self.angle = angle
+            
         return Bullet((self.x, self.y), velocity, angle, color=(Bullet.COLOR_SPECIAL if manual else Bullet.COLOR_DEFAULT))
+
+        
+def describe_fire_path(screen: pygame.Surface, shooter: Shooter, aim_assist: bool = True, ark_line: bool = True):
+    color = (52, 161, 235)
+    max_box_size = 10
+    
+    mouse = pygame.mouse.get_pos()
+    
+    x, y = shooter.rect.center
+    tx, ty = mouse
+    
+    angle = shooter.find_angle(mouse, aim_assist, Settings.BALL_VELOCITY)
+    
+    target = Target(mouse, color=("green" if angle else "red"))
+    
+    if angle:
+        shooter.angle = angle
+        
+        angle_degrees = (angle % (2*math.pi)) * (180/math.pi)
+
+        angle_degrees_from_ground = (angle_degrees + 90) % 360
+        if angle_degrees_from_ground > 180: angle_degrees_from_ground = 360 - angle_degrees_from_ground
+        angle_degrees_from_ground = -(angle_degrees_from_ground - 90)
+        
+        fire_angle_text = FONT.render(f"Fire at {angle_degrees_from_ground:.0f}°", True, "black")
+        
+        if ark_line and aim_assist:  
+            tracer = Tracer((x, y), Settings.BALL_VELOCITY, angle)
+            time = tracer.find_end_time(target)
+            
+            time_jump = time / 10
+                        
+            position = tracer.find_position(time)
+            
+            while time > 0:
+                pygame.draw.circle(screen, color, position, 4)
+                time -= time_jump
+                position = tracer.find_position(time)
+                
+            pygame.draw.circle(screen, color, tracer.find_position(0), 4)                 
+    else:
+        fire_angle_text = FONT.render(f"Out of range", True, "black")
+            
+                
+    if ark_line and not aim_assist: pygame.draw.line(screen, color, (x, y), (tx, ty), 2)
+    
+    pygame.draw.line(screen, color, (x, y), (tx, y), 3)
+    horizontal_line_text = FONT.render(f"{abs(tx - x) / UNIT:.1f}", True, "black")
+    screen.blit(horizontal_line_text, ((x + tx) / 2, y - [0, horizontal_line_text.get_height()][ty > y]))
+    
+    pygame.draw.line(screen, color, (tx, y), (tx, ty), 3)
+    vertical_line_text = FONT.render(f"{abs(ty - y) / UNIT:.1f}", True, "black")
+    screen.blit(vertical_line_text, (tx - [0, horizontal_line_text.get_width()][tx < x], (y + ty) / 2))
+    
+    min_distance = min(abs(tx - x), abs(ty-y))
+    
+    if min_distance != 0:
+        box_size = min(max_box_size, min_distance)
+        pygame.draw.rect(screen, color, pygame.Rect(tx + [0, -box_size][tx > x], y - [box_size, 0][ty > y], box_size, box_size), 2)
+    
+    screen.blit(target.image, target.rect)
+    
+    screen.blit(fire_angle_text, (shooter.x - fire_angle_text.get_rect().width/2, shooter.y + shooter.RADIUS))
+            
 
 def main() -> None:
     width, height = Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT
-
-    pygame.font.init()
-    font = pygame.font.Font('freesansbold.ttf', 16)
-    
+ 
     screen = pygame.display.set_mode((width, height))
-    clock = pygame.time.Clock()
 
     shooters = pygame.sprite.Group()
     bullets = pygame.sprite.Group()
@@ -191,12 +268,17 @@ def main() -> None:
         shooters.add(Shooter(position))
 
     targets = pygame.sprite.Group()
+    
+    tracer_shooter = 0
      
     going = True
-    
-    display_mode = False
-    
+        
     aim_assist = Settings.AIM_ASSIST_START
+    aim_assist_line = True
+    
+    info_on = 1000
+    
+    info = FONT.render("M to cycle firing display, A to toggle smart aim.", True, (0, 0, 0))
 
     while going:     
                 
@@ -217,9 +299,12 @@ def main() -> None:
                 elif event.key == pygame.K_r:
                     targets.add(Target(pygame.mouse.get_pos())) 
                 elif event.key == pygame.K_m:
-                    display_mode = not display_mode
+                    aim_assist_line = True
+                    tracer_shooter = (tracer_shooter + 1) % (len(shooters) + 1)
                 elif event.key == pygame.K_a:
                     aim_assist = not aim_assist
+                elif event.key == pygame.K_l:
+                    aim_assist_line = not aim_assist_line
 
         if Settings.AUTO_FIRE_MODE and targets:
             for shooter in shooters:
@@ -243,61 +328,19 @@ def main() -> None:
             for y in range(UNIT, Settings.SCREEN_HEIGHT, UNIT):
                 pygame.draw.line(screen, Settings.LINE_COLOR, (0, y), (Settings.SCREEN_WIDTH, y))
                 
-        if display_mode:
-            shooter: Shooter = shooters.sprites()[-1]
-            mouse = pygame.mouse.get_pos()
-            
-            x, y = shooter.rect.center
-            tx, ty = mouse
-            
-            angle = shooter.find_angle(mouse, aim_assist, Settings.BALL_VELOCITY)
-            
-            target = Target(mouse, color=("green" if angle else "red"))
-            
-            color = (52, 161, 235)
-            
-            if angle:
-                angle_degrees = (angle % (2*math.pi)) * (180/math.pi)
-
-                angle_degrees_from_ground = (angle_degrees + 90) % 360
-                if angle_degrees_from_ground > 180: angle_degrees_from_ground = 360 - angle_degrees_from_ground
-                angle_degrees_from_ground = -(angle_degrees_from_ground - 90)
-                
-                fire_angle_text = font.render(f"Fire at {angle_degrees_from_ground:.0f}°", True, "black")
-                
-                tracer = Tracer((x, y), Settings.BALL_VELOCITY, angle)
-                time = tracer.find_end_time(target)
-                time_chunk = time / 10
-                
-                
-                while time >= 0:
-                    pygame.draw.circle(screen, color, tracer.find_position(time), 4)
-                    time -= time_chunk
-                    
-                        
-            pygame.draw.line(screen, color, (x, y), (tx, ty), 2)
-            
-            pygame.draw.line(screen, color, (x, y), (tx, y), 3)
-            pygame.draw.line(screen, color, (tx, y), (tx, ty), 3)
-            
-            max_box_size = 10
-            min_distance = min(abs(tx - x), abs(ty-y))
-            
-            if min_distance != 0:
-                box_size = min(max_box_size, min_distance)
-                pygame.draw.rect(screen, color, pygame.Rect(tx + [0, -box_size][tx > x], y - [box_size, 0][ty > y], box_size, box_size), 2)
-            
-            screen.blit(target.image, target.rect)
-            
-            if angle:
-                screen.blit(fire_angle_text, (shooter.rect.centerx - fire_angle_text.get_rect().width/2, shooter.rect.centery - fire_angle_text.get_rect().height/2 + shooter.rect.height))
-            
         bullets.draw(screen)
         targets.draw(screen)
         shooters.draw(screen)
         
+        if tracer_shooter != 0:
+            describe_fire_path(screen, shooters.sprites()[tracer_shooter - 1], aim_assist, aim_assist_line)
+        
+        if info_on:
+            screen.blit(info, (0, 0))
+            info_on -= 1
+        
         pygame.display.flip()
-        clock.tick(Settings.FPS)
+        CLOCK.tick(Settings.FPS)
 
 
 if __name__ == "__main__":
