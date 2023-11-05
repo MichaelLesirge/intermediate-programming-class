@@ -22,7 +22,7 @@ class Settings:
     
     DRAW_GRID = True
 
-    AUTO_FIRE_MODE = True
+    AUTO_FIRE_MODE = False
         
     AIM_ASSIST_START = True
     HIGH_ARK_MODE = False
