@@ -3,7 +3,7 @@ from colors import Color
 import enum
 
 @dataclass(slots=True, frozen=True)
-class SuiteType:
+class Suite:
     order: int 
     symbol: str
     color: Color
@@ -11,8 +11,9 @@ class SuiteType:
     def __str__(self) -> str:
         return self.symbol
 
-class Suites(enum.Enum):
-    SPADES = SuiteType(0, "♠", Color.BLACK)
-    HEARTS = SuiteType(1, "♥", Color.RED)
-    DIAMONDS = SuiteType(2, "♦", Color.RED)
-    CLUBS = SuiteType(3, "♣", Color.BLACK)
+SPADES = Suite(0, "♠", Color.BLACK)
+HEARTS = Suite(1, "♥", Color.RED)
+DIAMONDS = Suite(2, "♦", Color.RED)
+CLUBS = Suite(3, "♣", Color.BLACK)
+
+SUITES = [SPADES, HEARTS, DIAMONDS, CLUBS]
