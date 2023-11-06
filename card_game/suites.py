@@ -11,9 +11,11 @@ class Suite:
     def __str__(self) -> str:
         return self.symbol
 
-SPADES = Suite(0, "♠", Color.BLACK)
-HEARTS = Suite(1, "♥", Color.RED)
-DIAMONDS = Suite(2, "♦", Color.RED)
-CLUBS = Suite(3, "♣", Color.BLACK)
+SUITES = [
+    Suite(0, "♠", Color.BLACK),
+    Suite(1, "♥", Color.RED),
+    Suite(2, "♦", Color.RED),
+    Suite(3, "♣", Color.BLACK),
+]
 
-SUITES = [SPADES, HEARTS, DIAMONDS, CLUBS]
+SPADES, HEARTS, DIAMONDS, CLUBS = SUITES
