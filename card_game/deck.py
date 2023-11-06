@@ -64,14 +64,8 @@ class CardGroup(list[Card]):
     def shuffle(self) -> None:
         random.shuffle(self)
 
-    def get_random(self) -> Card:
-        return random.choice(self)
-
-    def pop_random(self) -> Card:
-        return self.pop(random.randrange(len(self)))
-
-    def draw(self) -> Card:
-        return self.pop()
+    def draw(self, draw_random = False) -> Card:
+        return self.pop(random.randrange(len(self)) if random else -1)
 
     def is_empty(self) -> bool:
         return len(self) == 0
@@ -85,6 +79,11 @@ class CardGroup(list[Card]):
                 len(suites.SUITES) + card.suite.order
 
         return super().sort(key=key, reverse=reverse)
+    
+    def take_from(self, other: "CardGroup", num_to_take: int = 1):
+        for i in range(num_to_take):
+            self.append(other.draw())
+        
 
     @typing.overload
     def __getitem__(self, __s: slice) -> "CardGroup[Card]": pass
@@ -112,3 +111,7 @@ class Deck(CardGroup):
             for rank in ranks.RANKS:
                 for suite in suites.SUITES:
                     self.append(Card(rank, suite))
+
+# card = Card(ranks.ACE, suites.CLUBS)
+# for i in range(4):
+#     print(card)

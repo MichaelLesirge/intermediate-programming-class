@@ -1,4 +1,3 @@
-import random
 from deck import Deck, CardGroup, Card
 import ranks, suites
 

@@ -65,7 +65,7 @@ def main():
         if sum(len(player.hand) for player in players) == 1:
             going = False
         elif not hand.is_empty():
-            card = hand.pop_random()
+            card = hand.draw(draw_random=True)
             next_player.hand.append(card)
             
             print(f"{current_player.name} gives the {card.to_shorthand()} to {next_player.name}, now has {plural("card", len(current_player.hand))} left:")
