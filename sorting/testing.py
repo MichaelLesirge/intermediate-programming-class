@@ -16,6 +16,9 @@ class TestLinkedList(unittest.TestCase):
     def test_empty(self):
         self.assert_all_sorted(make_random(0))
 
+    def test_one_long(self):
+        self.assert_all_sorted(make_random(1))
+
     def test_two_long(self):
         self.assert_all_sorted(make_random(2))
             
