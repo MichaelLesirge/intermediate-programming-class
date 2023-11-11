@@ -108,7 +108,7 @@ class Tracer(Bullet):
 class Shooter(pygame.sprite.Sprite):
     COLOR = (0, 0, 0)
     RADIUS = 0.5 * UNIT
-    BARREL_SIZE = (RADIUS, 3)
+    BARREL_WIDTH = (RADIUS, 5)
     
     COOL_DOWN = 0.25
     
@@ -119,14 +119,17 @@ class Shooter(pygame.sprite.Sprite):
         
         self.next_fire_time = time.time() + self.COOL_DOWN
 
-        self.image = pygame.Surface((self.RADIUS * 2 , self.RADIUS * 2), pygame.SRCALPHA, 32).convert_alpha()
+        radius = self.RADIUS
+        circumference = self.RADIUS * 2 
+        
+        self.image = pygame.Surface((circumference , circumference), pygame.SRCALPHA, 32).convert_alpha()
         
         
         self.angle = 0
         
-        # pygame.draw.circle(self.image, Settings.BACKGROUND, (self.RADIUS, self.RADIUS), self.RADIUS)
-        pygame.draw.circle(self.image, color, (self.RADIUS, self.RADIUS), self.RADIUS, 3)
-        pygame.draw.rect(self.image, color, pygame.Rect((self.RADIUS, self.RADIUS - self.BARREL_SIZE[1] / 2), self.BARREL_SIZE))
+        # pygame.draw.circle(self.image, Settings.BACKGROUND, (radius, radius), radius)
+        pygame.draw.circle(self.image, color, (radius, radius), radius, 3)
+        pygame.draw.rect(self.image, color, pygame.Rect((radius, radius - self.BARREL_WIDTH[1] / 2), self.BARREL_WIDTH))
         self.rect = self.image.get_rect(center=(self.x, self.y))
         
         self.image = pygame.transform.rotate(self.image, self.angle)
