@@ -100,6 +100,12 @@ def main() -> None:
     clock = pygame.time.Clock()
         
     font = pygame.font.Font('sorting/font.ttf', 16)
+
+    print("Controls")
+    print("Speed Up: Up Arrow")
+    print("Slow Down: Down Arrow")
+    print("Skip: Space")
+    print()
     
     for length, fps_adjuster_default in Config.ARRAY_LENGTHS.items():
         
@@ -115,9 +121,9 @@ def main() -> None:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT: exit(pygame.quit())
                     if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_DOWN: fps_adjuster = round(max(fps_adjuster - Config.FPS_CHANGE, 0), 2)
-                        if event.key == pygame.K_UP: fps_adjuster = round(min(fps_adjuster + Config.FPS_CHANGE, 20), 2)
-                        if event.key == pygame.K_RIGHT: fps_adjuster = float("inf")
+                        if event.key in [pygame.K_DOWN]: fps_adjuster = round(max(fps_adjuster - Config.FPS_CHANGE, 0), 2)
+                        if event.key in [pygame.K_UP]: fps_adjuster = round(min(fps_adjuster + Config.FPS_CHANGE, 20), 2)
+                        if event.key in [pygame.K_RIGHT, pygame.K_SPACE]: fps_adjuster = float("inf")
                         
                 if fps_adjuster == float("inf"): return
 

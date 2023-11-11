@@ -188,6 +188,11 @@ def main():
     paddle = Paddle((100, 10))
     floors.add(paddle)
 
+    print("Controls")
+    print("Move Paddle: Mouse")
+    print("Spin Paddle: Left/Right Arrow")
+    print()
+    
     while running:
         if pygame.event.get(pygame.QUIT):
             running = False

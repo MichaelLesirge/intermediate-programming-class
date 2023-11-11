@@ -278,7 +278,19 @@ def main() -> None:
     
     info_on = 1000
     
-    info = FONT.render("M to cycle firing display, A to toggle smart aim.", True, (0, 0, 0))
+    info = FONT.render("Left click to shoot, M to cycle firing display, A to toggle smart aim.", True, (0, 0, 0))
+
+    print("Controls")
+    print("Left Click: Fire at mouse")
+    print("Right Click: Place shooter")
+    
+    print("Cycle firing view: M")
+    print("Toggle firing view line: K")
+    print("Toggle smart aim: A")
+    
+    print("Place target: T")
+    print("Place random target: F")
+    
 
     while going:     
                 
@@ -294,9 +306,9 @@ def main() -> None:
                 elif event.button == 3:
                     shooters.add(Shooter(pygame.mouse.get_pos()))
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_t:
+                if event.key == pygame.K_r:
                     targets.add(Target(random_position()))
-                elif event.key == pygame.K_r:
+                elif event.key == pygame.K_t:
                     targets.add(Target(pygame.mouse.get_pos())) 
                 elif event.key == pygame.K_m:
                     aim_assist_line = True
