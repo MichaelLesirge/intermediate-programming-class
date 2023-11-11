@@ -6,7 +6,6 @@ from util import make_random
 import algorithms
 
 class Config:
-    # use merge sort no copy since it looks nicer, even though it is much slower
     SORTING_ALGORITHMS = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
     NUM_RANGE = (-100000, 100000)
     
