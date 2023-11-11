@@ -19,7 +19,7 @@ def swap(array: list, a: int, b: int) -> None:
 def selection_sort(array: list) -> None:
     n = len(array)
     
-    for i in range(n):
+    for i in range(n-1):
         
         min_index = min(range(i, n), key = array.__getitem__)     
         
