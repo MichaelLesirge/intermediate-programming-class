@@ -3,12 +3,10 @@ import unittest
 import algorithms
 from util import make_random
 
-algorithms = [algorithms.bubble_sort, algorithms.insertion_sort, algorithms.selection_sort, algorithms.merge_sort, algorithms.quick_sort]
-
 class TestLinkedList(unittest.TestCase):
     def assert_all_sorted(self, array: list):
         sorted_array = sorted(array)
-        for algorithm in algorithms:
+        for algorithm in algorithms.__all__:
             array_copy = array.copy()
             algorithm(array_copy)
             self.assertEqual(array_copy, sorted_array, f"Failed algorithm: {algorithm.__name__}")
