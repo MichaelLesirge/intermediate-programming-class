@@ -1,8 +1,8 @@
-import ranks
-import suites
-from colors import make_color, Color, Modifier
-import dataclasses
+from . import ranks
+from . import suites
+from .colors import make_color, Color, Modifier
 
+import dataclasses
 import random
 import typing
 
@@ -70,15 +70,13 @@ class CardGroup(list[Card]):
     def is_empty(self) -> bool:
         return len(self) == 0
 
-    def sort(self, suite_first=False,  reverse=False):
-        if suite_first:
-            def key(card): return card.suite.order * \
-                len(ranks.RANKS) + card.rank.number
-        else:
-            def key(card): return card.rank.number * \
-                len(suites.SUITES) + card.suite.order
+    def sort(self, suite_first=False, reverse=False):
+        def suite_first_key(card): return card.suite.order * \
+            len(ranks.RANKS) + card.rank.number
+        def rank_first_key(card): return card.rank.number * \
+            len(suites.SUITES) + card.suite.order
 
-        return super().sort(key=key, reverse=reverse)
+        return super().sort(key=(suite_first_key if suite_first else rank_first_key), reverse=reverse)
     
     def take_from(self, other: "CardGroup", num_to_take: int = 1):
         for i in range(num_to_take):
@@ -103,15 +101,3 @@ class CardGroup(list[Card]):
 
     def __str__(self) -> str:
         return self.to_string()
-
-
-class Deck(CardGroup):
-    def __init__(self, num_decks: int = 1) -> None:
-        for i in range(num_decks):
-            for rank in ranks.RANKS:
-                for suite in suites.SUITES:
-                    self.append(Card(rank, suite))
-
-# card = Card(ranks.ACE, suites.CLUBS)
-# for i in range(4):
-#     print(card)

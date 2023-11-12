@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from colors import Color
+from .colors import Color
 import enum
 
 @dataclass(slots=True, frozen=True)

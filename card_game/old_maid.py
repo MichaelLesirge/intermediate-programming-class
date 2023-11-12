@@ -1,9 +1,7 @@
 import dataclasses
 import random
 
-import ranks
-import suites
-from deck import Card, CardGroup, Deck
+from deck import Card, CardGroup, Deck, ranks, suites
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class Player:
