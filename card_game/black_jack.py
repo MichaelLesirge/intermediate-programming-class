@@ -1,5 +1,4 @@
-from deck import Deck, CardGroup, Card
-import ranks, suites
+from deck import Deck, CardGroup, Card, ranks, suites
 
 def deal_initial_cards(deck: CardGroup) -> tuple[CardGroup, CardGroup]:
     player_hand = CardGroup([deck.draw(), deck.draw()])
