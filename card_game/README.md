@@ -1,5 +1,5 @@
 # Card Game
-Card games in python. Includes a few games as well as a 
+Card games in python. Includes a easy to use card and deck class to make it easer to make card games. Currently just has the game [Old Maid](https://bicyclecards.com/how-to-play/old-maid) as a demo, as well as a half finished [Blackjack](https://bicyclecards.com/how-to-play/blackjack)
 
 ## Custom Sizes
 ![Card Size Code](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/cf3aeff7-690a-4382-b4ee-850f3bc498b1)
