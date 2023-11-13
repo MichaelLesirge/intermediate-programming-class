@@ -11,7 +11,7 @@ class Rank:
     def __str__(self) -> str:
         return self.letter
     
-RANKS = [
+ALL = [
     Rank("A", 1, False),
     Rank("2", 2, False),
     Rank("3", 3, False),
@@ -27,5 +27,5 @@ RANKS = [
     Rank("K", 13, True),
 ]
 
-ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING = RANKS
+ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING = ALL
     

@@ -11,11 +11,11 @@ class Suite:
     def __str__(self) -> str:
         return self.symbol
 
-SUITES = [
+ALL = [
     Suite(0, "♠", Color.BLACK),
     Suite(1, "♥", Color.RED),
     Suite(2, "♦", Color.RED),
     Suite(3, "♣", Color.BLACK),
 ]
 
-SPADES, HEARTS, DIAMONDS, CLUBS = SUITES
+SPADES, HEARTS, DIAMONDS, CLUBS = ALL

@@ -14,7 +14,7 @@ def plural(group_name: str, num: int) -> int:
 def main():
     deck = Deck()
     
-    old_maid = Card(ranks.QUEEN, random.choice(suites.SUITES))
+    old_maid = Card(ranks.QUEEN, random.choice(suites.ALL))
     
     names_input = input("Enter player names, separated by comma: ")
     players = [Player(name.strip().title(), CardGroup()) for name in names_input.split(",")]

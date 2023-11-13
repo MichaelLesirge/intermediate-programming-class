@@ -6,12 +6,10 @@ import dataclasses
 import random
 import typing
 
-class Settings:
-    CARD_SIZE = 1
-
-
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class Card:
+    CARD_SIZE = 1
+
     rank: ranks.Rank
     suite: suites.Suite
 
@@ -27,7 +25,7 @@ class Card:
     def to_shorthand(self):
         return make_color(self.rank.letter + self.suite.symbol, self.suite.color, modifiers=[Modifier.BOLD])
 
-    def to_string_lines(self, size: int = Settings.CARD_SIZE, hide=False) -> list[str]:
+    def to_string_lines(self, size: int, hide=False) -> list[str]:
         space_between = size
         width = size * 4 + 3
 
@@ -50,14 +48,17 @@ class Card:
 
         return [make_color(line, color, modifiers=[Modifier.BOLD]) for line in lines]
 
-    def to_string(self, size: int = Settings.CARD_SIZE, hide=False):
+    def to_string(self, size: int, hide=False):
         return "\n".join(self.to_string_lines(size, hide))
 
     def __str__(self) -> str:
-        return self.to_string()
+        return self.to_string(Card.CARD_SIZE)
 
 
 class CardGroup(list[Card]):
+    CARDS_PER_ROW = len(suites.ALL)
+    CARD_SIZE = Card.CARD_SIZE
+    
     def __init__(self, cards: list[Card] = []) -> None:
         super().__init__(cards)
 
@@ -65,16 +66,16 @@ class CardGroup(list[Card]):
         random.shuffle(self)
 
     def draw(self, draw_random = False) -> Card:
-        return self.pop(random.randrange(len(self)) if random else -1)
+        return self.pop(random.randrange(len(self)) if draw_random else -1)
 
     def is_empty(self) -> bool:
         return len(self) == 0
 
     def sort(self, suite_first=False, reverse=False):
         def suite_first_key(card): return card.suite.order * \
-            len(ranks.RANKS) + card.rank.number
+            len(ranks.ALL) + card.rank.number
         def rank_first_key(card): return card.rank.number * \
-            len(suites.SUITES) + card.suite.order
+            len(suites.ALL) + card.suite.order
 
         return super().sort(key=(suite_first_key if suite_first else rank_first_key), reverse=reverse)
     
@@ -95,9 +96,9 @@ class CardGroup(list[Card]):
             output = CardGroup(output)
         return output
 
-    def to_string(self, size=Settings.CARD_SIZE, cards_per_row=len(suites.SUITES)) -> str:
+    def to_string(self, size=None, cards_per_row=None) -> str:
         # Join was the worst thing to happen to the readability of my code since goto.
-        return "\n".join("\n".join(" ".join(line) for line in zip(*[card.to_string_lines(size=size) for card in self[i:i+cards_per_row]])) for i in range(0, len(self), cards_per_row))
+        return "\n".join("\n".join(" ".join(line) for line in zip(*[card.to_string_lines(size=(CardGroup.CARD_SIZE if size is None else size)) for card in self[i:i+(cards_per_row or CardGroup.CARDS_PER_ROW)]])) for i in range(0, len(self), (cards_per_row or CardGroup.CARDS_PER_ROW)))
 
     def __str__(self) -> str:
         return self.to_string()
