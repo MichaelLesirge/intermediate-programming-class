@@ -13,7 +13,7 @@ class PhysicsConstants:
     GRAVITY = 9.81 * UNIT
 
 class Settings:
-    FPS = 1000
+    FPS = 60
 
     SHOOTER_START = [(6 * UNIT, 13 * UNIT)]
     SCREEN_WIDTH, SCREEN_HEIGHT = 21 * UNIT, 15 * UNIT
@@ -22,7 +22,7 @@ class Settings:
     
     DRAW_GRID = True
 
-    AUTO_FIRE_MODE = False
+    AUTO_FIRE_MODE = True
         
     AIM_ASSIST_START = True
     HIGH_ARK_MODE = False
