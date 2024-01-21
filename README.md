@@ -12,5 +12,5 @@ Here are some of my favorite from each section:
 ## Pygame Physics
 ![Balls Bouncing](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/2349ff71-d97f-4015-8cc8-e2aeadac33a9)
 
-## card game
+## Card Game
 ![Card Hands](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/4db8cb19-5511-4e45-9f51-72177598d03a)
