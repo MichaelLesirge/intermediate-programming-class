@@ -1,5 +1,5 @@
 # intermediate-programming-class
-All my random projects for my 10th grade intermediate programming class at school.
+All my random projects for my 10th grade intermediate programming class at school. I tried to make it more interesting by making the projects a bit more complicated.
 
 Here are some of my favorite from each section:
 
