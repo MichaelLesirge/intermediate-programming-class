@@ -7,7 +7,7 @@ Here are some of my favorite from each section:
 ![Quick and Merge 100 long list](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/383f2dd2-ad0f-4029-8c64-b0f5b3bf38fc)
 
 ## Turtle
-![Spirals GIF](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/1a3ea05b-22dc-4c83-b645-ff70130239ab)
+![Random Walker](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/29f6eb11-581a-4c1e-b2e9-c625b94642f5)
 
 ## Pygame Physics
 ![Balls Bouncing](https://github.com/michael-lesirge/intermediate-programming-class/assets/100492377/2349ff71-d97f-4015-8cc8-e2aeadac33a9)
